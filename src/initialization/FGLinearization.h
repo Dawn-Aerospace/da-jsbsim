@@ -28,6 +28,7 @@
 #include "models/propulsion/FGTurboProp.h"
 #include <fstream>
 #include <cstdlib>
+#include <ctime>
 
 namespace JSBSim {
 
@@ -42,24 +43,12 @@ class FGLinearization
     std::vector<double> x0, u0, y0;
     std::vector<string> x_names, u_names, y_names, x_units, u_units, y_units;
     std::string aircraft_name;
+    FGFDMExec* fdm;
 public:
     /**
-     * @param fdmPtr Already configured FGFDMExec instance used to create the new linear model.
+     * @param fdm Already configured FGFDMExec instance used to create the new linear model.
      */
-    FGLinearization(FGFDMExec * fdmPtr);
-
-    /**
-     * Write Scicoslab source file with the state space model to a
-     * file in the current working directory.
-     */
-    void WriteScicoslab() const;
-
-    /**
-     * Write Scicoslab source file with the state space model to the given path.
-     *
-     * @param path
-     */
-    void WriteScicoslab(std::string& path) const;
+    FGLinearization(FGFDMExec *FDMExec, double h=1E-4);
 
     /**
      * Get the state space model matrices.

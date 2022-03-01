@@ -62,6 +62,7 @@ INCLUDES
 #include "input_output/FGScript.h"
 #include "input_output/FGXMLFileRead.h"
 #include "initialization/FGInitialCondition.h"
+#include "initialization/FGLinearization.h"
 
 using namespace std;
 
@@ -157,6 +158,7 @@ FGFDMExec::FGFDMExec(FGPropertyManager* root, std::shared_ptr<unsigned int> fdmc
   Constructing = true;
   typedef int (FGFDMExec::*iPMF)(void) const;
   instance->Tie("simulation/do_simple_trim", this, (iPMF)0, &FGFDMExec::DoTrim);
+  instance->Tie("simulation/do_linearization", this, (iPMF)0, &FGFDMExec::DoLinearization);
   instance->Tie("simulation/reset", this, (iPMF)0, &FGFDMExec::ResetToInitialConditions);
   instance->Tie("simulation/disperse", this, &FGFDMExec::GetDisperse);
   instance->Tie("simulation/randomseed", this, (iPMF)&FGFDMExec::SRand, &FGFDMExec::SRand);
@@ -1239,6 +1241,63 @@ void FGFDMExec::DoTrim(int mode)
   trim_completed = 1;
 }
 
+
+double FGFDMExec::DoTrim_Simulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol)
+{
+double trim_result = 0.0;
+  if (mode < 0 || mode > JSBSim::tNone){ throw("Illegal trimming mode!");};
+   
+
+  FGTrim trim(this, (JSBSim::TrimMode)mode, trim_tol);
+  trim.SetMaxCycles(max_iter);
+  trim.SetMaxCyclesPerAxis(max_sub_iter);
+  trim.SetGammaFallback(gamma_fallback);
+  bool result = trim.DoTrim();
+  trim.TrimStats();
+  trim.Report();
+
+  if (result==true){
+        trim_result = 1.0; //trim_passed;
+   }
+   else {
+        trim_result = 2.0; //trim_failed;
+            //throw TrimFailureException("Trim Failed");
+  };
+
+  return trim_result;
+
+
+}
+
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+void FGFDMExec::DoLinearization(int enable_linearization)
+{
+ 
+  if (enable_linearization==1){
+  double saved_time;
+  if (Constructing) return;
+  saved_time = sim_time;
+  FGLinearization lin(this,1E-4);
+  sim_time = saved_time;
+  Setsim_time(saved_time);
+  }
+  else {
+    cout << "\n Linearization not enabled \n" << endl;
+  }
+}
+
+void FGFDMExec::DoLinearization_Simulink(double h)
+{
+  double saved_time;
+  if (Constructing) return;
+  saved_time = sim_time;
+  FGLinearization lin(this, h);
+  sim_time = saved_time;
+  Setsim_time(saved_time);
+}
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGFDMExec::SRand(int sr)

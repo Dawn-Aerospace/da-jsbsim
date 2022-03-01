@@ -279,7 +279,8 @@ public:
                    std::vector< std::vector<double> > & A,
                    std::vector< std::vector<double> > & B,
                    std::vector< std::vector<double> > & C,
-                   std::vector< std::vector<double> > & D);
+                   std::vector< std::vector<double> > & D,
+                   double h=1E-4);
 
 
 private:
@@ -838,7 +839,7 @@ public:
     class Vn : public Component
     {
     public:
-        Vn() : Component("Vel north","feet/s") {};
+        Vn() : Component("Vel north","ft/s") {};
         double get() const
         {
             return m_fdm->GetPropagate()->GetVel(1);
@@ -857,7 +858,7 @@ public:
     class Ve : public Component
     {
     public:
-        Ve() : Component("Vel east","feet/s") {};
+        Ve() : Component("Vel east","ft/s") {};
         double get() const
         {
             return m_fdm->GetPropagate()->GetVel(2);
@@ -876,7 +877,7 @@ public:
     class Vd : public Component
     {
     public:
-        Vd() : Component("Vel down","feet/s") {};
+        Vd() : Component("Vel down","ft/s") {};
         double get() const
         {
             return m_fdm->GetPropagate()->GetVel(3);
@@ -918,7 +919,6 @@ public:
             return Vn/(Vn*Vn+Ve*Ve)*Vedot - Ve/(Vn*Vn+Ve*Ve)*Vndot;
         }
     };
-
 };
 
 // stream output
