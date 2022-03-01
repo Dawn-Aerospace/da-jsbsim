@@ -46,7 +46,7 @@ INCLUDES
 DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#define DEFAULT_TOLERANCE 0.001
+#define DEFAULT_TOLERANCE 1E-3
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
@@ -94,7 +94,8 @@ public:
   FGTrimAxis(FGFDMExec* fdmex, 
              FGInitialCondition *IC, 
              State state,
-             Control control );
+             Control control,
+             double trim_tol=DEFAULT_TOLERANCE);
   /// Destructor
   ~FGTrimAxis();
 
