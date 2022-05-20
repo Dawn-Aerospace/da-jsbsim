@@ -239,9 +239,17 @@ void FGPropulsion::ConsumeFuel(FGEngine* engine)
   bool OxiStarved = Starved;
 
   engine->SetStarved(FuelStarved || (hasOxTanks && OxiStarved)); // Tanks can be refilled, so be sure to reset engine Starved flag here.
+  engine->SetFuelStarved(FuelStarved);
+  engine->SetOxiStarved(hasOxTanks && OxiStarved);
 
   // No fuel or fuel/oxidizer found at any priority!
-//  if (Starved) return;
+  //  if (Starved) return;
+  if (engine->GetType() == FGEngine::etRocket) {
+
+  } else {
+    
+  }
+
   if (FuelStarved || (hasOxTanks && OxiStarved)) return;
 
   double FuelToBurn = engine->CalcFuelNeed();            // How much fuel does this engine need?

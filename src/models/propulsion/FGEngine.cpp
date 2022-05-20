@@ -78,7 +78,8 @@ void FGEngine::ResetToIC(void)
 {
   Starter = false;
   FuelExpended = 0.0;
-  Starved = Running = Cranking = false;
+  Starved = FuelStarved = OxiStarved = false;
+  Running = Cranking = false;
   PctPower = 0.0;
   FuelFlow_gph = 0.0;
   FuelFlow_pph = 0.0;
@@ -94,7 +95,7 @@ double FGEngine::CalcFuelNeed(void)
 {
   FuelFlowRate = SLFuelFlowMax*PctPower;
   FuelExpended = FuelFlowRate*in.TotalDeltaT;
-  if (!Starved) FuelUsedLbs += FuelExpended;
+  if (!FuelStarved || !Starved) FuelUsedLbs += FuelExpended;
   return FuelExpended;
 }
 

@@ -76,7 +76,6 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
   TotalIspVariation = 0.0;
   VacThrust = 0.0;
   Flameout = false;
-  OpMode = -1;
   PropFlowConversion = 1.0;
 
   // Defaults
@@ -222,7 +221,7 @@ void FGRocket::Calculate(void)
 
   } else { // liquid fueled rocket assumed
 
-    if (in.ThrottlePos[EngineNumber] < MinThrottle || Starved) { // Combustion not supported
+    if (in.ThrottlePos[EngineNumber] < MinThrottle || (Starved && (OpMode == eModeBiProp))) { // Combustion not supported
 
       PctPower = 0.0; // desired thrust
       Flameout = true;

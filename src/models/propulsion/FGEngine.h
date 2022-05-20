@@ -134,8 +134,10 @@ public:
   ~FGEngine() override;
 
   enum EngineType {etUnknown, etRocket, etPiston, etTurbine, etTurboprop, etElectric};
+  enum EngineOperationMode {emOff = -1, emMonoProp, emBiProp};
 
   EngineType GetType(void) const { return Type; }
+  double GetOperationMode(void) const {return OpMode;}
   virtual const std::string&  GetName(void) const { return Name; }
 
   // Engine controls
@@ -149,11 +151,19 @@ public:
   virtual double GetFuelFlowRateGPH(void) const {return FuelFlowRate*3600/FuelDensity;}
   virtual double GetFuelUsedLbs(void) const {return FuelUsedLbs;}
   virtual bool   GetStarved(void) const { return Starved; }
+  virtual bool   FuelGetStarved(void) const { return FuelStarved; }
+  virtual bool   OxiGetStarved(void) const { return OxiStarved; }
   virtual bool   GetRunning(void) const { return Running; }
   virtual bool   GetCranking(void) const { return Cranking; }
 
   virtual void SetStarved(bool tt) { Starved = tt; }
   virtual void SetStarved(void)    { Starved = true; }
+  virtual void SetFuelStarved(bool tt) { FuelStarved = tt; }
+  virtual void SetFuelStarved(void)    { FuelStarved = true; }
+  virtual void SetOxiStarved(bool tt) { OxiStarved = tt; }
+  virtual void SetOxiStarved(void)    { OxiStarved = true; }
+
+  virtual void SetOperationMode(double mode) {OpMode = std::round(mode);}
 
   virtual void SetRunning(bool bb) { Running=bb; }
   virtual void SetName(const std::string& name) { Name = name; }
@@ -201,7 +211,10 @@ protected:
 
   std::string Name;
   const int   EngineNumber;
+
   EngineType Type;
+  EngineOperationMode OpMode;
+
   double SLFuelFlowMax;
   double MaxThrottle;
   double MinThrottle;
@@ -209,8 +222,11 @@ protected:
   double FuelExpended;
   double FuelFlowRate;
   double PctPower;
+
   bool  Starter;
   bool  Starved;
+  bool  FuelStarved;
+  bool  OxiStarved;
   bool  Running;
   bool  Cranking;
   bool  FuelFreeze;
