@@ -464,14 +464,6 @@ cdef class FGLinearization:
         if not self.thisptr:
             raise AttributeError("Object is not initialized")
 
-    def write_scicoslab(self, path):
-        """@Dox(JSBSim::FGLinearization::WriteScicoslab)"""
-        self.__intercept_invalid_pointer()
-        if path is None:
-            deref(self.thisptr).WriteScicoslab()
-        else:
-            deref(self.thisptr).WriteScicoslab(path.encode("utf-8"))
-
     @property
     def x0(self):
         """Initial state"""
