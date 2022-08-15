@@ -1249,7 +1249,7 @@ void FGFDMExec::DoTrim(int mode)
 }
 
 
-double FGFDMExec::DoTrim_Simulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol)
+double FGFDMExec::DoTrimSimulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol)
 {
 double trim_result = 0.0;
   if (mode < 0 || mode > JSBSim::tNone){ throw("Illegal trimming mode!");};
@@ -1296,7 +1296,7 @@ void FGFDMExec::DoLinearization(int enable_linearization)
   }
 }
 
-void FGFDMExec::DoLinearization_Simulink(double h)
+void FGFDMExec::DoLinearizationSimulink(double h)
 {
   double saved_time;
   if (Constructing) return;

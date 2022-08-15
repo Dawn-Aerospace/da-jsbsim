@@ -468,9 +468,9 @@ public:
   * - tTurn
   * - tNone  */
   void DoTrim(int mode);
-  double DoTrim_Simulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol);
+  double DoTrimSimulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol);
   void DoLinearization(int enable_linearization);
-  void DoLinearization_Simulink(double h);
+  void DoLinearizationSimulink(double h);
   /// Disables data logging to all outputs.
   void DisableOutput(void) { Output->Disable(); }
   /// Enables data logging to all outputs.
