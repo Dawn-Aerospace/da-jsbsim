@@ -843,7 +843,7 @@ void FGTrim::SetMode(TrimMode tt, double trim_tol) {
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tCustom:
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol*1E10));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol));
         //TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi,trim_tol ));
