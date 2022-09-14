@@ -801,8 +801,7 @@ void FGTrim::SetMode(TrimMode tt, double trim_tol) {
     mode=tt;
     switch(tt) {
       case tFull:
-        if (debug_lvl > 0)
-          cout << "  Full Trim" << endl;
+        cout << "  Trim mode: full" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
@@ -812,20 +811,19 @@ void FGTrim::SetMode(TrimMode tt, double trim_tol) {
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tLongitudinal:
-        if (debug_lvl > 0)
-          cout << "  Longitudinal Trim" << endl;
+        cout << "  Trim mode: longitudinal" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
         break;
       case tGround:
-        if (debug_lvl > 0)
-          cout << "  Ground Trim" << endl;
+        cout << "  Trim mode: ground" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAltAGL ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tTheta ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tPhi ));
         break;
       case tPullup:
+        cout << "  Trim mode: pullup" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tNlf,tAlpha,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
@@ -835,6 +833,7 @@ void FGTrim::SetMode(TrimMode tt, double trim_tol) {
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tTurn:
+        cout << "  Trim mode: turn" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
@@ -843,8 +842,8 @@ void FGTrim::SetMode(TrimMode tt, double trim_tol) {
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tCustom:
+        cout << "  Trim mode: attitude" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol));
-        //TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi,trim_tol ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tRollTrim,trim_tol ));

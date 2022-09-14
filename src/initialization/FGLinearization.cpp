@@ -24,8 +24,8 @@ namespace JSBSim {
 FGLinearization::FGLinearization(FGFDMExec * FDMExec, double h)
 {
     fdm = FDMExec;
-    std::cout << "\nlinearization: " << std::endl;
-    std::cout << "sampling time: " << h <<std::endl;
+    //std::cout << "\nlinearization: " << std::endl;
+    //std::cout << "sampling time: " << h <<std::endl;
     std::clock_t time_start=clock(), time_linDone;
     FGStateSpace ss(fdm);
 
@@ -93,7 +93,8 @@ FGLinearization::FGLinearization(FGFDMExec * FDMExec, double h)
 
 
  time_linDone = std::clock();
-    std::cout << "linearization computation time: " << (time_linDone - time_start)/double(CLOCKS_PER_SEC) << " s\n" << std::endl;
+    std::cout << "  Linearization computation time: " << (time_linDone - time_start)/double(CLOCKS_PER_SEC) << " s\n" << std::endl;
+
 /*
 int width=10;
     std::cout.precision(10);

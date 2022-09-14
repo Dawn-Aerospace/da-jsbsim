@@ -189,11 +189,19 @@ FGRocket::~FGRocket(void)
 
 void FGRocket::Calculate(void)
 {
-  if (FDMExec->IntegrationSuspended()) return;
+
+  if (this->OpMode==-1) return;
 
   RunPreFunctions();
-
+  FuelExpended = CalcFuelNeed();
+  OxidizerExpended = CalcOxidizerNeed();
+  
+  if (in.TotalDeltaT == 0.0){
+  PropellantFlowRate = 0.0;
+  }
+  else{
   PropellantFlowRate = (FuelExpended + OxidizerExpended) / in.TotalDeltaT;
+  }
   TotalPropellantExpended += FuelExpended + OxidizerExpended;
 
   // If Isp has been specified as a function, override the value of Isp to that,

@@ -513,7 +513,14 @@ void FGFDMExec::LoadInputs(unsigned int idx)
     Propulsion->in.AeroPQR          = Auxiliary->GetAeroPQR();
     Propulsion->in.alpha            = Auxiliary->Getalpha();
     Propulsion->in.beta             = Auxiliary->Getbeta();
-    Propulsion->in.TotalDeltaT      = dT * Propulsion->GetRate();
+        if (dT==0)
+    {
+      Propulsion->in.TotalDeltaT      = saved_dT* Propulsion->GetRate();
+    }
+    else
+    {
+      Propulsion->in.TotalDeltaT      = dT * Propulsion->GetRate();
+    }
     Propulsion->in.ThrottlePos      = FCS->GetThrottlePos();
     Propulsion->in.MixturePos       = FCS->GetMixturePos();
     Propulsion->in.ThrottleCmd      = FCS->GetThrottleCmd();
@@ -522,7 +529,6 @@ void FGFDMExec::LoadInputs(unsigned int idx)
     Propulsion->in.PropFeather      = FCS->GetPropFeather();
     Propulsion->in.H_agl            = Propagate->GetDistanceAGL();
     Propulsion->in.PQRi             = Propagate->GetPQRi();
-
     break;
   case eAerodynamics:
     Aerodynamics->in.Alpha     = Auxiliary->Getalpha();
@@ -1260,7 +1266,7 @@ double trim_result = 0.0;
   trim.SetMaxCyclesPerAxis(max_sub_iter);
   trim.SetGammaFallback(gamma_fallback);
   bool result = trim.DoTrim();
-  trim.TrimStats();
+  //trim.TrimStats();
   trim.Report();
 
   if (result==true){
