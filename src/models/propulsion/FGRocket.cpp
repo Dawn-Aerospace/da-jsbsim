@@ -190,7 +190,7 @@ FGRocket::~FGRocket(void)
 void FGRocket::Calculate(void)
 {
 
-  if (this->OpMode==-1) return;
+ //if (this->OpMode==-1) return;
 
   RunPreFunctions();
   FuelExpended = CalcFuelNeed();
