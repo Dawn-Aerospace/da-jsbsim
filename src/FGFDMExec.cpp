@@ -527,6 +527,7 @@ void FGFDMExec::LoadInputs(unsigned int idx)
     Propulsion->in.MixtureCmd       = FCS->GetMixtureCmd();
     Propulsion->in.PropAdvance      = FCS->GetPropAdvance();
     Propulsion->in.PropFeather      = FCS->GetPropFeather();
+    Propulsion->in.OperationMode    = FCS->GetOperationMode();
     Propulsion->in.H_agl            = Propagate->GetDistanceAGL();
     Propulsion->in.PQRi             = Propagate->GetPQRi();
     break;
@@ -1034,13 +1035,13 @@ void FGFDMExec::BuildPropertyCatalog(struct PropertyCatalogStructure* pcs)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-string FGFDMExec::QueryPropertyCatalog(const string& in)
+string FGFDMExec::QueryPropertyCatalog(const string& in, const string& end_of_line)
 {
   string results;
   for (auto &catalogElm: PropertyCatalog) {
-    if (catalogElm.find(in) != string::npos) results += catalogElm + "\n";
+    if (catalogElm.find(in) != string::npos) results += catalogElm + end_of_line;
   }
-  if (results.empty()) return "No matches found\n";
+  if (results.empty()) return "No matches found"+end_of_line;
   return results;
 }
 
