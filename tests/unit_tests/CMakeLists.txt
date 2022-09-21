@@ -12,11 +12,16 @@ set(UNIT_TESTS FGColumnVector3Test
                FGInitialConditionTest
                FGInertialTest
                FGPropertyValueTest
-               FGTableTest)
+               FGTableTest
+               FGRealValueTest
+               FGParameterTest
+               FGParameterValueTest
+               FGConditionTest)
 
 foreach(test ${UNIT_TESTS})
   cxxtest_add_test(${test}1 ${test}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${test}.h)
   target_link_libraries(${test}1 libJSBSim)
+  add_coverage(${test}1)
 endforeach()
 
 # Windows needs the DLL to be copied locally for unit tests to run.
