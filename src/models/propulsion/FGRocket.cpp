@@ -190,18 +190,19 @@ FGRocket::~FGRocket(void)
 void FGRocket::Calculate(void)
 {
 
- //if (this->OpMode==-1) return;
+  // if (this->OpMode == -1) return;
 
   RunPreFunctions();
+  
   FuelExpended = CalcFuelNeed();
   OxidizerExpended = CalcOxidizerNeed();
   
-  if (in.TotalDeltaT == 0.0){
-  PropellantFlowRate = 0.0;
+  if (in.TotalDeltaT == 0.0) {
+    PropellantFlowRate = 0.0;
+  } else {
+    PropellantFlowRate = (FuelExpended + OxidizerExpended) / in.TotalDeltaT;
   }
-  else{
-  PropellantFlowRate = (FuelExpended + OxidizerExpended) / in.TotalDeltaT;
-  }
+
   TotalPropellantExpended += FuelExpended + OxidizerExpended;
 
   // If Isp has been specified as a function, override the value of Isp to that,
@@ -237,8 +238,6 @@ void FGRocket::Calculate(void)
       VacThrust = 0.0;
 
     } else { // Calculate thrust
-
-      // PctPower = Throttle / MaxThrottle; // Min and MaxThrottle range from 0.0 to 1.0, normally.
       
       PctPower = in.ThrottlePos[EngineNumber];
       Flameout = false;
@@ -267,6 +266,7 @@ double FGRocket::CalcFuelNeed(void)
   if (ThrustTable != 0L) {          // Thrust table given - infers solid fuel
     FuelFlowRate = VacThrust / Isp; // This calculates wdot (weight flow rate in lbs/sec)
     FuelFlowRate /= (1 + TotalIspVariation);
+
   } else {
     if (propflow_function) {
       PropFlowMax = propflow_function->GetValue();
@@ -277,7 +277,7 @@ double FGRocket::CalcFuelNeed(void)
 
     OpMode = std::round(in.OperationMode[EngineNumber]);
 
-    if (OpMode == eModeMonoProp) {
+    if (OpMode == eModeMonoProp || MxR > 10E+6) {
       SLFuelFlowMax = 0.0;
     } else {
       SLFuelFlowMax = PropFlowMax / (1 + MxR);
@@ -287,6 +287,7 @@ double FGRocket::CalcFuelNeed(void)
   }
 
   FuelExpended = FuelFlowRate * in.TotalDeltaT; // For this time step ...
+
   return FuelExpended;
 }
 
@@ -301,9 +302,15 @@ double FGRocket::CalcOxidizerNeed(void)
 
   if (mxr_function) MxR = mxr_function->GetValue();
 
-  SLOxiFlowMax = PropFlowMax * MxR / (1 + MxR);
+  if (MxR > 10E+6) {
+    SLOxiFlowMax = PropFlowMax;
+  } else {
+    SLOxiFlowMax = PropFlowMax * MxR / (1 + MxR);
+  }
+  
   OxidizerFlowRate = SLOxiFlowMax * PctPower;
   OxidizerExpended = OxidizerFlowRate * in.TotalDeltaT;
+
   return OxidizerExpended;
 }
 
