@@ -901,17 +901,6 @@ bool FGFDMExec::LoadModel(const string& model, bool addModelToPath)
         FCS->AddThrottle();
     }
 
-    // Process the system element[s]. This element is OPTIONAL, and there may be more than one.
-    element = document->FindElement("system");
-    while (element) {
-      result = Models[eSystems]->Load(element);
-      if (!result) {
-        cerr << endl << "Aircraft system element has problems in file " << aircraftCfgFileName << endl;
-        return result;
-      }
-      element = document->FindNextElement("system");
-    }
-
     // Process the autopilot element. This element is OPTIONAL.
     element = document->FindElement("autopilot");
     if (element) {
@@ -942,6 +931,17 @@ bool FGFDMExec::LoadModel(const string& model, bool addModelToPath)
       }
     } else {
       cerr << endl << "No expected aerodynamics element was found in the aircraft config file." << endl;
+    }
+
+    // Process the system element[s]. This element is OPTIONAL, and there may be more than one.
+    element = document->FindElement("system");
+    while (element) {
+      result = Models[eSystems]->Load(element);
+      if (!result) {
+        cerr << endl << "Aircraft system element has problems in file " << aircraftCfgFileName << endl;
+        return result;
+      }
+      element = document->FindNextElement("system");
     }
 
     // Process the input element. This element is OPTIONAL, and there may be more than one.
