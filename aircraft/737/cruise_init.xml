@@ -11,5 +11,7 @@
   <longitude unit="DEG"> 122.0 </longitude>
   <phi unit="DEG">         0.0 </phi>
   <psi unit="DEG">       225.0 </psi>
-  <beta unit="DEG">        0.0 </beta>
+    <beta unit="DEG">        0.0 </beta>
+      <running unit="">   -1 </running>
+
 </initialize>

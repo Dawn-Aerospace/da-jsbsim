@@ -24,13 +24,14 @@
   <vbody unit="FT/SEC">    0.0 </vbody>
   <wbody unit="FT/SEC">    0.0 </wbody>
   <phi   unit="DEG">       0.0 </phi>
-  <theta unit="DEG">       0.0 </theta>
-  <psi   unit="DEG">     180.0 </psi>
+  <theta unit="DEG">       3.0 </theta>
+  <psi   unit="DEG">     55.0 </psi>
 
   <!-- KEDW wind rose location -->
-  <longitude   unit="DEG">  -117.87323 </longitude>
-  <latitude    unit="DEG">    34.95416 </latitude>
+  <longitude   unit="DEG">  10.0 </longitude>
+  <latitude    unit="DEG">    20.0 </latitude>
   <elevation   unit="FT">   2283.5     </elevation>
   <altitudeAGL unit="FT">      6.3     </altitudeAGL>
+      <running unit="">   -1 </running>
 
 </initialize>
