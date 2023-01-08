@@ -129,8 +129,8 @@ bool FGFCS::InitModel(void)
   for (i=0; i<MixtureCmd.size(); i++) MixtureCmd[i] = 0.0;
   for (i=0; i<PropAdvance.size(); i++) PropAdvance[i] = 0.0;
   for (i=0; i<PropFeather.size(); i++) PropFeather[i] = 0.0;
-  for (i=0; i<OperationModeCmd.size(); i++) OperationModeCmd[i] = -1.0;
-  for (i=0; i<OperationMode.size(); i++) OperationMode[i] = -1.0;
+  for (i=0; i<OperationModeCmd.size(); i++) OperationModeCmd[i] = fdmex->GetPropertyValue("propulsion/engine/rocket/initial_state");
+  for (i=0; i<OperationMode.size(); i++) OperationMode[i] = fdmex->GetPropertyValue("propulsion/engine/rocket/initial_state");
 
   DaCmd = DeCmd = DrCmd = DfCmd = DsbCmd = DspCmd = 0;
   PTrimCmd = YTrimCmd = RTrimCmd = 0.0;
@@ -766,8 +766,8 @@ void FGFCS::AddThrottle(void)
   PropAdvance.push_back(0.0);
   PropFeatherCmd.push_back(false);
   PropFeather.push_back(false);
-  OperationModeCmd.push_back(-1.0);
-  OperationMode.push_back(-1.0);
+  OperationModeCmd.push_back(fdmex->GetPropertyValue("propulsion/engine/rocket/initial_state"));
+  OperationMode.push_back(fdmex->GetPropertyValue("propulsion/engine/rocket/initial_state"));
 
   unsigned int num = (unsigned int)ThrottleCmd.size()-1;
   bindThrottle(num);

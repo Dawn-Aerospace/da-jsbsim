@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
+<runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
+           name="DaMk2-rocket midair fuel dump">
+
+    <description>
+        This is a very simple script that starts by spawning the plane midair and putting it into a bi-prop state,
+        then dumping some fuel before resuming a bi-prop state
+    </description>
+
+    <use aircraft="damk2-rocket" initialize="NZGT_ALT"/>
+
+    <run start="0" end="50" dt="0.008333">
+        <property value="0"> simulation/trigger-biprop </property>
+        <property value="20"> simulation/trigger-dump </property>
+        <property value="30"> simulation/trigger-biprop2 </property>
+        <property value="0"> simulation/notify-time-trigger</property>
+
+        <event name="Set Bi-prop" persistent="true">
+            <condition>
+                simulation/sim-time-sec >= simulation/trigger-biprop
+                simulation/sim-time-sec le 15
+            </condition>
+            <set name="simulation/trigger-biprop" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="1"/>
+        </event>
+
+        <event name="Set dumping" persistent="true">
+            <condition>
+                simulation/sim-time-sec >= simulation/trigger-dump
+                simulation/sim-time-sec le 30
+            </condition>
+            <set name="simulation/trigger-dump" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="3"/>
+        </event>
+
+        <event name="Set Bi-prop2" persistent="true">
+            <condition>
+                simulation/sim-time-sec >= simulation/trigger-biprop2
+            </condition>
+            <set name="simulation/trigger-biprop2" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="1"/>
+        </event>
+
+        <event name="Repeating Notify" persistent="true">
+            <description>Output message at 5 second intervals</description>
+            <notify>
+                <property>propulsion/engine/rocket-state</property>
+                <property>propulsion/tank[0]/contents-lbs</property>
+                <property>velocities/vc-kts</property>
+            </notify>
+            <condition> simulation/sim-time-sec >= simulation/notify-time-trigger </condition>
+            <set name="simulation/notify-time-trigger" value="5" type="FG_DELTA"/>
+        </event>
+
+    </run>
+
+    <output name="daMk2_takeoff_output.csv" type="CSV" rate="10">
+        <property>propulsion/engine/rocket-state</property>
+        <property>fcs/engine-opmode[0]</property>
+        <property>fcs/throttle-main-engine</property>
+        <property>fcs/throttle-cmd-norm[0]</property>
+        <property>propulsion/tank[0]/contents-lbs</property>
+    </output>
+
+</runscript>

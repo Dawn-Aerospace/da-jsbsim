@@ -54,7 +54,7 @@ CLASS IMPLEMENTATION
 FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Inputs& input)
   : FGEngine(engine_number, input),
     isp_function(nullptr), propflow_function(nullptr), mxr_function(nullptr),
-    FDMExec(exec)
+    FDMExec(exec), state(RocketState(exec))
 {
   Load(exec, el);
 
@@ -79,7 +79,7 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
   OpMode = -1;
   PropFlowConversion = 1.0;
 
-  // Defaults
+    // Defaults
    MinThrottle = 0.0;
    MaxThrottle = 1.0;
 
@@ -88,7 +88,7 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
 
   auto PropertyManager = exec->GetPropertyManager();
   bindmodel(PropertyManager.get()); // Bind model properties first, since they might be needed in functions.
-
+  FDMExec->SetPropertyValue("propulsion/engine/rocket/start-state", FDMExec->GetPropertyValue("propulsion/engine/rocket/initial_state"));
   Element* isp_el = el->FindElement("isp");
 
   // Specific impulse may be specified as a constant value or as a function -
@@ -172,7 +172,6 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
       }
     }
   }
-
 
   Debug(0);
 }
@@ -367,6 +366,16 @@ void FGRocket::bindmodel(FGPropertyManager* PropertyManager)
                                                        &FGRocket::SetIsp);
     property_name = base_property_name + "/operation-mode";
     PropertyManager->Tie( property_name.c_str(), this, &FGRocket::GetOperationMode);
+
+    property_name = base_property_name + "/rocket-state";
+    PropertyManager->Tie( property_name.c_str(), &state, &RocketState::GetState, &RocketState::SetState);
+
+    property_name = base_property_name + "/rocket/decay-state";
+    PropertyManager->Tie( property_name.c_str(), &state, &RocketState::GetDecayState);
+
+    property_name = base_property_name + "/rocket/start-state";
+    PropertyManager->Tie( property_name.c_str(), &state, &RocketState::GetState, &RocketState::SetStartState);
+
   }
 }
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
+<runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
+           name="DaMk2-rocket thrust cycle">
+
+    <description>
+        This is a very simple script that starts by launching the plane, starting from a safe state.
+        The state is then set to bi-prop which moves the plane through the arming then mono-prop sequence till
+        it reaches bi-prop and then back to arm
+    </description>
+
+    <use aircraft="damk2-rocket" initialize="NZGT_RWY15"/>
+
+    <run start="0" end="30" dt="0.008333">
+        <property value="0"> simulation/trigger-arm </property>
+        <property value="3"> simulation/trigger-biprop </property>
+        <property value="23"> simulation/trigger-mono2 </property>
+        <property value="24.6"> simulation/trigger-arm2 </property>
+        <set value="1" name="fcs/throttle-main-engine" />
+
+        <event name="Set arm" persistent="true">
+            <condition>
+                simulation/sim-time-sec >= simulation/trigger-arm
+                simulation/sim-time-sec le 3
+            </condition>
+            <set name="simulation/trigger-arm" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="5"/>
+        </event>
+
+        <event name="Set Bi-prop" persistent="true">
+            <condition>
+                simulation/sim-time-sec >= simulation/trigger-biprop
+                simulation/sim-time-sec le 22
+            </condition>
+            <set name="simulation/trigger-biprop" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="1"/>
+        </event>
+
+        <event name="Set mono2" persistent="true">
+            <condition>
+                simulation/sim-time-sec >= simulation/trigger-mono2
+                simulation/sim-time-sec le 25
+            </condition>
+            <set name="simulation/trigger-mono2" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="0"/>
+        </event>
+
+        <event name="Set Arm2" persistent="true">
+            <condition>simulation/sim-time-sec >= simulation/trigger-arm2</condition>
+            <set name="simulation/trigger-arm2" value="0.1" type="FG_DELTA"/>
+            <set name="propulsion/engine/rocket-state" value="5"/>
+        </event>
+
+    </run>
+
+    <output name="/home/caleb/repos/data/daMk2_thrust_output.csv" type="CSV" rate="100">
+        <property>propulsion/engine/vacuum-thrust_lbs</property>
+        <property>fcs/throttle-main-engine</property>
+        <property>propulsion/engine/isp</property>
+        <property>propulsion/engine/propflowmax</property>
+        <property>propulsion/engine/rocket/transit-time</property>
+        <property>propulsion/engine/mixture-ratio</property>
+        <property>propulsion/engine/rocket-state</property>
+        <property>propulsion/engine/rocket/decay-state</property>
+    </output>
+
+</runscript>

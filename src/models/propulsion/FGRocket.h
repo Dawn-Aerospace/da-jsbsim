@@ -41,6 +41,7 @@ INCLUDES
 #include "FGEngine.h"
 #include "math/FGTable.h"
 #include "math/FGFunction.h"
+#include "RocketState.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
@@ -204,12 +205,14 @@ public:
   /** Returns the Total Isp variation, if any. */
   double GetTotalIspVariation(void) const {return TotalIspVariation;}
 
+
 private:
   /** Returns the vacuum thrust.
       @return The vacuum thrust in lbs. */
   double GetVacThrust(void) const {return VacThrust;}
 
   void bindmodel(FGPropertyManager* pm);
+
 
   double Isp; // Vacuum Isp
   double It;    // Total actual Isp
@@ -242,6 +245,8 @@ private:
   FGFunction* mxr_function;
   
   FGFDMExec* FDMExec;
+
+  RocketState state;
 
   void Debug(int from);
 };

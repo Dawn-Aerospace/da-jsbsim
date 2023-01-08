@@ -11,7 +11,8 @@ set(SOURCES FGElectric.cpp
             FGTurboProp.cpp
             FGTransmission.cpp
             FGRotor.cpp
-            FGBrushLessDCMotor.cpp)
+            FGBrushLessDCMotor.cpp
+            RocketState.cpp)
 
 set(HEADERS FGElectric.h
             FGEngine.h
@@ -26,7 +27,8 @@ set(HEADERS FGElectric.h
             FGTurboProp.h
             FGTransmission.h
             FGRotor.h
-            FGBrushLessDCMotor.h)
+            FGBrushLessDCMotor.h
+            RocketState.h)
 
 add_library(Propulsion OBJECT ${HEADERS} ${SOURCES})
 set_target_properties(Propulsion PROPERTIES TARGET_DIRECTORY
