@@ -212,7 +212,7 @@ namespace JSBSim {
              << FDMExec->GetSimTime() << " seconds" << endl;
       }
     }
-    //do we need to call set state this causes the recursion
+
     if (nextState != targetState) {
       SetState(targetState);
     } else {

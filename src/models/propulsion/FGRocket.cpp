@@ -97,8 +97,6 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
     FDMExec->SetPropertyValue("propulsion/engine/rocket/start-state", StartState);
   }
 
-
-
   Element* isp_el = el->FindElement("isp");
 
   // Specific impulse may be specified as a constant value or as a function -
@@ -386,8 +384,6 @@ void FGRocket::bindmodel(FGPropertyManager* PropertyManager)
     property_name = base_property_name + "/rocket/start-state";
     PropertyManager->Tie( property_name.c_str(), &state, &DARocketState::GetState, &DARocketState::SetStartState);
 
-
-
   }
 }
 
@@ -441,8 +437,4 @@ void FGRocket::Debug(int from)
     }
   }
 }
-
-    void FGRocket::SetStartState(int StartState) {
-      cout<<"^^^TEST"<<endl;
-    }
 }

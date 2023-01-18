@@ -434,7 +434,6 @@ public:
   void SetFeatherCmd(int engine, bool cmd);
   //@}
 
-
   /// @name Aerosurface position setting
   //@{
   /** Sets the left aileron position
