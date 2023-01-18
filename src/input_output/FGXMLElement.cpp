@@ -169,7 +169,7 @@ Element::Element(const string& nm)
     convert["KG/MIN"]["LBS/MIN"] = convert["KG"]["LBS"];
     convert["KG/SEC"]["LBS/SEC"] = convert["KG"]["LBS"];
     convert["N/SEC"]["LBS/SEC"] = 0.224808943;
-    convert["LBS/SEC"]["N/SEC"] = 1.0/convert ["N/SEC"]["LBS/SEC"];
+    convert["LBS/SEC"]["N/SEC"] = 1.0/convert["N/SEC"]["LBS/SEC"];
     convert["KG/SEC"]["LBS/MIN"] = convert["KG"]["LBS"] * convert["SEC"]["MIN"];
     convert["KG/MIN"]["LBS/SEC"] = convert["KG"]["LBS"] * convert["MIN"]["SEC"];
 
@@ -182,7 +182,6 @@ Element::Element(const string& nm)
     // Gravitational
     convert["FT3/SEC2"]["M3/SEC2"] = convert["FT3"]["M3"];
     convert["M3/SEC2"]["FT3/SEC2"] = convert["M3"]["FT3"];
-
 
     // Length
     convert["M"]["M"] = 1.00;

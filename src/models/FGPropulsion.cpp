@@ -418,7 +418,10 @@ bool FGPropulsion::Load(Element* el)
     engine_element = el->FindNextElement("engine");
   }
 
-  if (numEngines) bind();
+  if (numEngines && !properties_bound) {
+    properties_bound = true;
+    bind();
+  }
 
   CalculateTankInertias();
 

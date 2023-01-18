@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+
+<rocket_engine name="rocket_engine">
+    <maxthrottle> 1.00 </maxthrottle>
+    <minthrottle> 0 </minthrottle>
+
+    <property value="1">propulsion/engine/rocket/transition-time/safe-arm</property>
+    <property value="1">propulsion/engine/rocket/transition-time/safe-dumping</property>
+    <property value="1">propulsion/engine/rocket/transition-time/safe-filling</property>
+    <property value="3">propulsion/engine/rocket/transition-time/arm-monoprop</property>
+    <property value="1">propulsion/engine/rocket/transition-time/arm-safe</property>
+    <property value="2">propulsion/engine/rocket/transition-time/monoprop-biprop</property>
+    <property value="1">propulsion/engine/rocket/transition-time/monoprop-arm</property>
+    <property value="2">propulsion/engine/rocket/transition-time/biprop-monoprop</property>
+    <property value="1">propulsion/engine/rocket/transition-time/dumping-safe</property>
+    <property value="1">propulsion/engine/rocket/transition-time/filling-safe</property>
+
+    <!-- MONO_PROP=0, BI_PROP=1, SAFE=2, DUMPING=3, FILLING=4, ARM=5 -->
+    <start_state>2</start_state>
+
+
+    <mixtureratio>
+        <function>
+            <ifthen>
+                <!-- if -->
+                <eq> <p> propulsion/engine/operation-mode </p> <v> 0 </v> </eq>
+
+                <!-- then -->
+                <v> 10e+10 </v>
+
+                <!-- else -->
+                <v> 5 </v>
+            </ifthen>
+        </function>
+    </mixtureratio>
+
+    <!-- Total propellant flow -->
+    <propflowmax unit="KG/SEC">
+        <function>
+            <ifthen>
+                <!-- if currently in stable state(0) -->
+                <eq><p>propulsion/engine/rocket/decay-state</p><v>0</v></eq>
+                <!-- then -->
+                <ifthen>
+                    <!-- if in mono-prop mode-->
+                    <eq> <p> propulsion/engine/operation-mode </p> <v> 0 </v> </eq>
+
+                    <!-- then -->
+                    <v> 1 </v>
+
+                    <!-- else -->
+                    <ifthen>
+                        <!-- if in bi-prop mode-->
+                        <eq> <p> propulsion/engine/operation-mode </p> <v> 1 </v> </eq>
+                        <!-- then -->
+                        <v> 1.5 </v>
+
+                        <!-- else -->
+                        <v> 0 </v>
+                    </ifthen>
+                </ifthen>
+                <!-- else in the process of a state transition -->
+                <table>
+                    <!--BI_TO_MONO=1,MONO_TO_ARM=2, ARM_TO_MONO=3, MONO_TO_BI=4-->
+                    <independentVar lookup="row"> propulsion/engine/rocket/transit-time </independentVar>
+                    <independentVar lookup="column"> propulsion/engine/rocket/decay-state </independentVar>
+                    <tableData>
+                                    1               2               3           4
+                        0.01		1.5		        1		        0     		1
+                        3.5		    1		        0               1	        1.5
+                    </tableData>
+                </table>
+            </ifthen>
+        </function>
+    </propflowmax>
+
+
+    <!-- Vacuum Isp, including efficiency -->
+    <isp>
+        <function>
+            <ifthen>
+                <!-- if currently in stable state(0) -->
+                <eq><p>propulsion/engine/rocket/decay-state</p><v>0</v></eq>
+                <!-- then -->
+                <ifthen>
+                    <!-- if in mono-prop mode-->
+                    <eq> <p> propulsion/engine/operation-mode </p> <v> 0 </v> </eq>
+
+                    <!-- then -->
+                    <v> 100 </v>
+
+                    <!-- else -->
+                    <ifthen>
+                        <!-- if in bi-prop mode-->
+                        <eq> <p> propulsion/engine/operation-mode </p> <v> 1 </v> </eq>
+                        <!-- then -->
+                        <v> 200 </v>
+
+                        <!-- else -->
+                        <v> 0 </v>
+                    </ifthen>
+                </ifthen>
+                <!-- else in the process of a state transition -->
+                <table>
+                    <!--BI_TO_MONO=1,MONO_TO_ARM=2, ARM_TO_MONO=3, MONO_TO_BI=4-->
+                    <independentVar lookup="row"> propulsion/engine/rocket/transit-time </independentVar>
+                    <independentVar lookup="column"> propulsion/engine/rocket/decay-state </independentVar>
+                    <tableData>
+                                    1               2               3                4
+                        0.01		200     		100     		0       		100
+                        3.5		    100        		0       		100     	    200
+                    </tableData>
+                </table>
+            </ifthen>
+        </function>
+    </isp>
+</rocket_engine>

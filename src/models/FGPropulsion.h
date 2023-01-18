@@ -202,6 +202,7 @@ private:
   void ConsumeFuel(FGEngine* engine);
 
   bool ReadingEngine;
+  bool properties_bound = false;
 
   void bind();
   void Debug(int from) override;

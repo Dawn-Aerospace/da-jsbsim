@@ -41,7 +41,7 @@ INCLUDES
 #include "FGEngine.h"
 #include "math/FGTable.h"
 #include "math/FGFunction.h"
-#include "RocketState.h"
+#include "DARocketState.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
@@ -169,7 +169,11 @@ public:
   double GetMixtureRatio(void) const {return MxR;}
 
   double GetIsp(void) const {return Isp;}
-  
+
+  int GetStartState() const {return StartState;}
+
+  void SetStartState(int StartState);
+
   double GetOperationMode(void) const {return OpMode;}
   
   void SetMixtureRatio(double mix) {MxR = mix;}
@@ -233,9 +237,9 @@ private:
   bool Flameout;
   double BuildupTime;
 
+  int StartState = SAFE;
   int OpMode;
 
-  enum {eModeOff = -1, eModeMonoProp, eModeBiProp};
 
   double PropFlowConversion;
 
@@ -246,7 +250,7 @@ private:
   
   FGFDMExec* FDMExec;
 
-  RocketState state;
+  DARocketState state;
 
   void Debug(int from);
 };
