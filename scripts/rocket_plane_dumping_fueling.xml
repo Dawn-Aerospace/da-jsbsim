@@ -2,68 +2,73 @@
 <?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
 <runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
-           name="DaMk2-rocket basic flight">
+           name="DaMk2-rocket dumping and fueling before flight">
 
     <description>
-        This is a very simple script that starts by launching the plane, starting from a safe state.
-        The state is then set to bi-prop which moves the plane through the arming then mono-prop sequence till
-        it reaches bi-prop.
+        This is a very simple script that starts by dumping all the fuel from the plane before refueling then performing
+        a bi-prop takeoff
     </description>
 
-    <use aircraft="damk2-rocket" initialize="NZGT_RWY15"/>
+    <use aircraft="RocketPlane" initialize="reset00"/>
 
-    <run start="0" end="10" dt="0.008333">
-        <property value="0"> simulation/trigger-arm </property>
-        <property value="3"> simulation/trigger-mono </property>
-        <property value="4"> simulation/trigger-biprop </property>
-        <property value="0"> simulation/notify-time-trigger </property>
+    <run start="0" end="75" dt="0.008333">
+
+        <property value="65"> simulation/trigger-biprop </property>
+        <property value="60"> simulation/trigger-arm </property>
+        <property value="50"> simulation/notify-time-trigger</property>
+
+
+        <event name="Set dumping">
+            <condition> simulation/sim-time-sec ge 1 </condition>
+            <set name="propulsion/engine/rocket-state" value="3"/>
+        </event>
+
+        <event name="Set safe">
+            <condition> simulation/sim-time-sec ge 50</condition>
+            <set name="propulsion/engine/rocket-state" value="2"/>
+        </event>
+
+        <event name="set refuel">
+            <condition> simulation/sim-time-sec ge 51 </condition>
+            <set name="propulsion/engine/rocket-state" value="4"/>
+        </event>
+
+        <event name="Set safe2">
+            <condition> simulation/sim-time-sec ge 55 </condition>
+            <set name="propulsion/engine/rocket-state" value="2"/>
+        </event>
 
         <event name="Set arm" persistent="true">
             <condition>
                 simulation/sim-time-sec >= simulation/trigger-arm
-                simulation/sim-time-sec le 3
+                simulation/sim-time-sec le 65
             </condition>
             <set name="simulation/trigger-arm" value="0.1" type="FG_DELTA"/>
             <set name="propulsion/engine/rocket-state" value="5"/>
         </event>
 
-
-        <event name="Set mono" persistent="true">
-            <condition>
-                simulation/sim-time-sec >= simulation/trigger-mono
-                simulation/sim-time-sec le 4
-            </condition>
-            <set name="simulation/trigger-mono" value="0.1" type="FG_DELTA"/>
-            <set name="propulsion/engine/rocket-state" value="0"/>
-        </event>
-
         <event name="Set Bi-prop" persistent="true">
             <condition>
                 simulation/sim-time-sec >= simulation/trigger-biprop
-                simulation/sim-time-sec le 22
             </condition>
             <set name="simulation/trigger-biprop" value="0.1" type="FG_DELTA"/>
             <set name="propulsion/engine/rocket-state" value="1"/>
         </event>
 
         <event name="Repeating Notify" persistent="true">
-            <description>Output message at 0.5 second intervals</description>
+            <description>Output message at 5 second intervals</description>
             <notify>
                 <property>propulsion/engine/rocket-state</property>
-                <property>propulsion/engine/rocket/decay-state</property>
-                <property>propulsion/engine/rocket/transit-time</property>
-                <property>propulsion/engine/isp</property>
                 <property>propulsion/tank[0]/contents-lbs</property>
                 <property>velocities/vc-kts</property>
-                <property>simulation/sim-time-sec</property>
             </notify>
             <condition> simulation/sim-time-sec >= simulation/notify-time-trigger </condition>
-            <set name="simulation/notify-time-trigger" value="1" type="FG_DELTA"/>
+            <set name="simulation/notify-time-trigger" value="5" type="FG_DELTA"/>
         </event>
 
     </run>
 
-    <output name="/home/caleb/repos/data/daMk2_takeoff_output.csv" type="CSV" rate="10">
+    <output name="daMk2_takeoff_output.csv" type="CSV" rate="10">
         <property>propulsion/engine/rocket-state</property>
         <property>fcs/engine-opmode[0]</property>
         <property>fcs/throttle-main-engine</property>
