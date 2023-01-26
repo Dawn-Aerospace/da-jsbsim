@@ -2,12 +2,10 @@
 <?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
 <runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
-           name="DaMk2-rocket thrust cycle">
+           name="rocket plane thrust cycle">
 
     <description>
-        This is a very simple script that starts by launching the plane, starting from a safe state.
-        The state is then set to bi-prop which moves the plane through the arming then mono-prop sequence till
-        it reaches bi-prop and then back to arm
+        Starting from an arm state, go to a biprop burn via mono prop then back to arm.
     </description>
 
     <use aircraft="RocketPlane" initialize="reset00"/>
@@ -54,7 +52,7 @@
 
     </run>
 
-    <output name="/home/caleb/repos/data/daMk2_thrust_output.csv" type="CSV" rate="100">
+    <output name="data/rocket_plane_thrust_output.csv" type="CSV" rate="100">
         <property>propulsion/engine/vacuum-thrust_lbs</property>
         <property>propulsion/engine/isp</property>
         <property>propulsion/engine/rocket/transit-time</property>

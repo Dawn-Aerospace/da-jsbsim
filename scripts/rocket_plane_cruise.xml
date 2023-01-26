@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
 <runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
-           name="DaMk2-rocket cruise">
+           name="Rocket Plane cruise">
 
     <description>
         This is a very simple script that starts by spawning the plane midair and putting it into a bi-prop state,
@@ -57,11 +57,9 @@
 
     </run>
 
-    <output name="daMk2_takeoff_output.csv" type="CSV" rate="10">
+    <output name="data/rocket_plane_cruise_output.csv" type="CSV" rate="10">
         <property>propulsion/engine/rocket-state</property>
-        <property>fcs/engine-opmode[0]</property>
-        <property>fcs/throttle-main-engine</property>
-        <property>fcs/throttle-cmd-norm[0]</property>
+        <property>propulsion/engine/operation-mode</property>
         <property>propulsion/tank[0]/contents-lbs</property>
     </output>
 

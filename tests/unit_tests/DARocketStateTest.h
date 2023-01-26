@@ -12,7 +12,7 @@
 using namespace JSBSim;
 
 
-class RocketStateTest : public CxxTest::TestSuite {
+class DARocketStateTest : public CxxTest::TestSuite {
 private:
     FGFDMExec setupTest() {
       std::string aircraft_path_ = "../../../aircraft";
