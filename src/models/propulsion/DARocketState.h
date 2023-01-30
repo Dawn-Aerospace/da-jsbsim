@@ -12,15 +12,16 @@ namespace JSBSim {
 
 class FGFDMExec;
 class FGPropertyManager;
-enum eRocketStates { NO_STATE=-1, MONO_PROP=0, BI_PROP=1, SAFE=2, DUMPING=3, FILLING=4, ARM=5};
+enum eRocketStates { NO_STATE=-2, ENGINE_ARM=-1, MONO_PROP=0, BI_PROP=1, SAFE=2, DUMPING=3, FILLING=4, SYSTEM_ARM=5};
 
 class DARocketState: FGJSBBase {
 private:
     enum eRocketDecayState {NONE=0, BI_TO_MONO=1,MONO_TO_ARM=2, ARM_TO_MONO=3, MONO_TO_BI=4};
     eRocketDecayState decayState = NONE;
     double stateChangeTime = 0;
-    string StateStrings[6] = {"MONO_PROP", "BI_PROP", "SAFE","DUMPING", "FILLING", "ARM"};
-    eRocketStates state = ARM;
+    map<int, string> StateStrings = {{-2,"NO_STATE"}, {-1, "ENGINE_ARM"},
+      {0, "MONO_PROP"}, {1, "BI_PROP"}, {2, "DUMPING"}, {4, "FILLING"}, {5, "SYSTEM_ARM"}};
+    eRocketStates state = SYSTEM_ARM;
     FGFDMExec* FDMExec;
     typedef void (DARocketState::*callback_function)(eRocketStates); // type for conciseness
     eRocketStates nextState = state;
@@ -39,9 +40,11 @@ private:
     double bipropToMonopropTime = 0;
     double dumpingToSafeTime = 0;
     double fillingToSafeTime = 0;
+    double systemArmToEngineArmTime = 0;
 
     void SafeState(eRocketStates newState);
-    void ArmState(eRocketStates newState);
+    void SystemArmState(eRocketStates newState);
+    void EngineArmState(eRocketStates newState);
     void MonoPropState(eRocketStates newState);
     void BiPropState(eRocketStates newState);
     void DumpingState(eRocketStates newState);

@@ -26,6 +26,7 @@ namespace JSBSim {
     BindProperty("propulsion/engine/rocket/transition-time/biprop-monoprop", bipropToMonopropTime);
     BindProperty("propulsion/engine/rocket/transition-time/dumping-safe", dumpingToSafeTime);
     BindProperty("propulsion/engine/rocket/transition-time/filling-safe", fillingToSafeTime);
+    BindProperty("propulsion/engine/rocket/transition-time/system-arm-engine-arm", systemArmToEngineArmTime);
   }
 
   void DARocketState::BindProperty(const string& path, double &variable) {
@@ -40,9 +41,6 @@ namespace JSBSim {
   // else start process of moving to a new state by passing the new state
   // into the state function for the current rocket state
   void DARocketState::SetState(int newStateInt) {
-    if (newStateInt == -1) {
-      newStateInt = ARM;
-    }
     auto new_state = static_cast<eRocketStates>(newStateInt);
     if (nextState != state) {
       checkDecay();
@@ -52,8 +50,11 @@ namespace JSBSim {
         case SAFE:
           SafeState(new_state);
           break;
-        case ARM:
-          ArmState(new_state);
+        case SYSTEM_ARM:
+          SystemArmState(new_state);
+          break;
+        case ENGINE_ARM:
+          EngineArmState(new_state);
           break;
         case MONO_PROP:
           MonoPropState(new_state);
@@ -73,7 +74,7 @@ namespace JSBSim {
 
   void DARocketState::SafeState(eRocketStates newState) {
     switch (newState) {
-      case ARM:
+      case SYSTEM_ARM:
         AddCallback(newState, safeToArmTime);
         break;
       case DUMPING:
@@ -87,7 +88,20 @@ namespace JSBSim {
     }
   }
 
-  void DARocketState::ArmState(eRocketStates newState) {
+  void DARocketState::SystemArmState(eRocketStates newState) {
+    switch (newState) {
+      case SAFE:
+        AddCallback(newState, armToSafeTime);
+        break;
+      case ENGINE_ARM:
+        AddCallback(newState, systemArmToEngineArmTime);
+        break;
+      default:
+        InvalidStateDebug(newState);
+    }
+  }
+
+  void DARocketState::EngineArmState(eRocketStates newState) {
     switch (newState) {
       case SAFE:
         AddCallback(newState, armToSafeTime);
@@ -109,11 +123,11 @@ namespace JSBSim {
     switch (newState) {
       case SAFE:
         AddCallback(newState, monopropToSafeTime);
-        SetDecayState(ARM);
+        SetDecayState(ENGINE_ARM);
         break;
-      case ARM:
+      case ENGINE_ARM:
         AddCallback(newState, monopropToArmTime);
-        SetDecayState(ARM);
+        SetDecayState(ENGINE_ARM);
         break;
       case BI_PROP:
         AddCallback(newState, monopropToBipropTime);
@@ -130,7 +144,7 @@ namespace JSBSim {
         AddCallback(newState, bipropToMonopropTime, MONO_PROP);
         SetDecayState(MONO_PROP);
         break;
-      case ARM:
+      case ENGINE_ARM:
         AddCallback(newState, bipropToMonopropTime, MONO_PROP);
         SetDecayState(MONO_PROP);
         break;
@@ -225,9 +239,9 @@ namespace JSBSim {
     stateChangeTime = FDMExec->GetPropertyValue("simulation/sim-time-sec");
     if (state == BI_PROP && transitionState == MONO_PROP) {
       decayState = BI_TO_MONO;
-    } else if (state == MONO_PROP && transitionState == ARM) {
+    } else if (state == MONO_PROP && transitionState == ENGINE_ARM) {
       decayState = MONO_TO_ARM;
-    } else if (state == ARM && transitionState == MONO_PROP) {
+    } else if (state == ENGINE_ARM && transitionState == MONO_PROP) {
       decayState = ARM_TO_MONO;
     } else if (state == MONO_PROP && transitionState == BI_PROP) {
       decayState = MONO_TO_BI;
@@ -237,7 +251,7 @@ namespace JSBSim {
   }
 
   void DARocketState::InvalidStateDebug(eRocketStates newState) {
-    if (debug_lvl > 0 && state != newState) {
+    if (debug_lvl > 1 && state != newState) {
       cout << "INVALID STATE TRANSITION: " << StateStrings[state] << " -> " << StateStrings[newState] << ", at time: "
            << FDMExec->GetSimTime() << " seconds" << endl;
     }
