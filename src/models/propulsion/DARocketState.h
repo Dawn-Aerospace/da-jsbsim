@@ -12,7 +12,7 @@ namespace JSBSim {
 
 class FGFDMExec;
 class FGPropertyManager;
-enum eRocketStates { NO_STATE=-2, ENGINE_ARM=-1, MONO_PROP=0, BI_PROP=1, SAFE=2, DUMPING=3, FILLING=4, SYSTEM_ARM=5};
+enum eRocketStates { NO_STATE=-2, ENGINE_ARM=-1, MONO_PROP=0, BI_PROP=1, SAFE=2, FILLING=3, DUMPING=4, SYSTEM_ARM=5};
 
 class DARocketState: FGJSBBase {
 private:
