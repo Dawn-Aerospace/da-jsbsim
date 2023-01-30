@@ -199,6 +199,7 @@ void FGRocket::Calculate(void)
   if (FDMExec->IntegrationSuspended()) return;
 
   RunPreFunctions();
+  OpMode = state.GetState();
 
   PropellantFlowRate = (FuelExpended + OxidizerExpended) / in.TotalDeltaT;
   TotalPropellantExpended += FuelExpended + OxidizerExpended;
@@ -273,8 +274,6 @@ double FGRocket::CalcFuelNeed(void)
     }
 
     if (mxr_function) MxR = mxr_function->GetValue();
-
-    OpMode = state.GetState();
 
     if (OpMode == MONO_PROP) {
       SLFuelFlowMax = 0.0;

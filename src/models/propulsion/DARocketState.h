@@ -20,7 +20,7 @@ private:
     eRocketDecayState decayState = NONE;
     double stateChangeTime = 0;
     map<int, string> StateStrings = {{-2,"NO_STATE"}, {-1, "ENGINE_ARM"},
-      {0, "MONO_PROP"}, {1, "BI_PROP"}, {2, "DUMPING"}, {4, "FILLING"}, {5, "SYSTEM_ARM"}};
+      {0, "MONO_PROP"}, {1, "BI_PROP"}, {2, "SAFE"}, {3, "FILLING"},{4, "DUMPING"}, {5, "SYSTEM_ARM"}};
     eRocketStates state = SYSTEM_ARM;
     FGFDMExec* FDMExec;
     typedef void (DARocketState::*callback_function)(eRocketStates); // type for conciseness
