@@ -14,6 +14,7 @@ using namespace JSBSim;
 
 class DARocketStateTest : public CxxTest::TestSuite {
 private:
+    enum eRocketStates { NO_STATE=-2, ENGINE_ARM=-1, MONO_PROP=0, BI_PROP=1, SAFE=2, FILLING=3, DUMPING=4, SYSTEM_ARM=5};
     FGFDMExec setupTest() {
       std::string aircraft_path_ = "../../../aircraft";
       std::string model_name_ = "RocketPlane";
@@ -51,7 +52,7 @@ public:
 
     void testStartingState() {
       FGFDMExec FDMExec = setupTest();
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 2);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), SAFE);
     }
 
     void testStartStateWhenSetToBiProp() {
@@ -59,7 +60,7 @@ public:
       while (FDMExec.GetSimTime() < 5) {
         FDMExec.Run();
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 1);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), BI_PROP);
     }
 
     void testSafeToArmTransition() {
@@ -70,21 +71,22 @@ public:
           FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 5);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), SYSTEM_ARM);
     }
 
     void testSafeToMonoPropTransition() {
       FGFDMExec FDMExec = setupTest();
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
-        if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
+        if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 1) {
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SYSTEM_ARM);
+        } else if (1 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", ENGINE_ARM);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 0);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", MONO_PROP);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 0);
-
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), MONO_PROP);
     }
 
     void TestSafeToBiPropDirect() {
@@ -92,83 +94,86 @@ public:
       while (FDMExec.GetSimTime() < 15) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SYSTEM_ARM);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", ENGINE_ARM);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 15) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 1);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", BI_PROP);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 1);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), BI_PROP);
     }
 
     void TestSafeToBiPropViaMono() {
       FGFDMExec FDMExec = setupTest();
       while (FDMExec.GetSimTime() < 15) {
         FDMExec.Run();
-        if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 3) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
+        if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 1) {
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SYSTEM_ARM);
+        } else if (1 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", ENGINE_ARM);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 9) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 0);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", MONO_PROP);
         } else if (9 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 15) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 1);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", BI_PROP);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 1);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), BI_PROP);
     }
 
     void TestBiPropToArm() {
-      FGFDMExec FDMExec = setupTestWithStartState(1);
+      FGFDMExec FDMExec = setupTestWithStartState(BI_PROP);
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 0);
-        } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", MONO_PROP);
+        } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 8) {
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", ENGINE_ARM);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 5);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), ENGINE_ARM);
     }
 
     void testFuelDumping() {
       FGFDMExec FDMExec = setupTest();
       double initial_fuel = FDMExec.GetPropertyValue("propulsion/tank[0]/contents-lbs");
       while (FDMExec.GetSimTime() < 10) {
-        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 3);
+        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", DUMPING);
         FDMExec.Run();
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/fuel_dump"), 1);
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/refuel"), 0);
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 3);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/fuel_dump"), BI_PROP);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/refuel"), MONO_PROP);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), DUMPING);
       TS_ASSERT_LESS_THAN(FDMExec.GetPropertyValue("propulsion/tank[0]/contents-lbs"), initial_fuel);
     }
 
     void testFilling() {
-      FGFDMExec FDMExec = setupTestWithStartState(3);
+      FGFDMExec FDMExec = setupTestWithStartState(DUMPING);
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
       }
       while (FDMExec.GetSimTime() < 12) {
-        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 2);
+        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SAFE);
         FDMExec.Run();
       }
       double low_fuel = FDMExec.GetPropertyValue("propulsion/tank[0]/contents-lbs");
       while (FDMExec.GetSimTime() < 15) {
-        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 4);
+      FDMExec.SetPropertyValue("propulsion/engine/rocket-state", FILLING);
         FDMExec.Run();
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/fuel_dump"), 0);
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/refuel"), 1);
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 4);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/fuel_dump"), MONO_PROP);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/refuel"), BI_PROP);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), FILLING);
       TS_ASSERT_LESS_THAN(low_fuel, FDMExec.GetPropertyValue("propulsion/tank[0]/contents-lbs"));
     }
 
     void testCantStateOverride() {
       FGFDMExec FDMExec = setupTest();
-      FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
+      FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SYSTEM_ARM);
       while (FDMExec.GetSimTime() < 5) {
         FDMExec.Run();
-        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 3);
+        FDMExec.SetPropertyValue("propulsion/engine/rocket-state", DUMPING);
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 5);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), SYSTEM_ARM);
     }
 
     void testInvalidSafeTransitions() {
@@ -176,87 +181,87 @@ public:
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 0);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", MONO_PROP);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 1);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", BI_PROP);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 2);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), SAFE);
     }
 
     void testInvalidArmTransitions() {
-      FGFDMExec FDMExec = setupTestWithStartState(5);
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 5);
+      FGFDMExec FDMExec = setupTestWithStartState(SYSTEM_ARM);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), SYSTEM_ARM);
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 3);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", FILLING);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 4);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", DUMPING);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 5);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), SYSTEM_ARM);
     }
 
     void testInvalidMonoPropTransitions() {
-      FGFDMExec FDMExec = setupTestWithStartState(0);
+      FGFDMExec FDMExec = setupTestWithStartState(MONO_PROP);
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 3);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", DUMPING);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 4);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", FILLING);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 0);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), MONO_PROP);
     }
 
 
     void testInvalidBiPropTransitions() {
-      FGFDMExec FDMExec = setupTestWithStartState(1);
+      FGFDMExec FDMExec = setupTestWithStartState(BI_PROP);
       while (FDMExec.GetSimTime() < 10) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 3);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", DUMPING);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 4);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", FILLING);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 1);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), BI_PROP);
     }
 
     void testInvalidDumpingTransitions() {
-      FGFDMExec FDMExec = setupTestWithStartState(3);
+      FGFDMExec FDMExec = setupTestWithStartState(DUMPING);
       while (FDMExec.GetSimTime() < 20) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 0);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", MONO_PROP);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 1);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", BI_PROP);
         } else if (10 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 15) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 5);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SYSTEM_ARM);
         } else if (15 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 20) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 4);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", FILLING);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 3);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), DUMPING);
     }
 
     void testInvalidFillingTransitions() {
-      FGFDMExec FDMExec = setupTestWithStartState(4);
+      FGFDMExec FDMExec = setupTestWithStartState(FILLING);
       while (FDMExec.GetSimTime() < 2) {
         FDMExec.Run();
         if (0 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 5) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 0);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", MONO_PROP);
         } else if (5 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 10) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 1);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", BI_PROP);
         } else if (10 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 15) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 1);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", SYSTEM_ARM);
         } else if (15 < FDMExec.GetSimTime() && FDMExec.GetSimTime() < 20) {
-          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", 3);
+          FDMExec.SetPropertyValue("propulsion/engine/rocket-state", DUMPING);
         }
       }
-      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), 4);
+      TS_ASSERT_EQUALS(FDMExec.GetPropertyValue("propulsion/engine/rocket-state"), FILLING);
     }
 
 };
