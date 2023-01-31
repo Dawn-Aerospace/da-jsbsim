@@ -42,6 +42,7 @@ INCLUDES
 
 #include "FGModel.h"
 #include "math/FGMatrix33.h"
+#include "DAWallTempEstimation.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
@@ -110,7 +111,7 @@ public:
 
   /** Runs the Aircraft model; called by the Executive
       Can pass in a value indicating if the executive is directing the simulation to Hold.
-      @param Holding if true, the executive has been directed to hold the sim from 
+      @param Holding if true, the executive has been directed to hold the sim from
                      advancing time. Some models may ignore this flag, such as the Input
                      model, which may need to be active to listen on a socket for the
                      "Resume" command to be given.
@@ -150,6 +151,7 @@ public:
   double GetMoments(int idx) const { return vMoments(idx); }
   const FGColumnVector3& GetForces(void) const { return vForces; }
   double GetForces(int idx) const { return vForces(idx); }
+  double GetLeadingEdgeTemp() const {return leadingEdgeTemp;}
   /** Gets the the aero reference point (RP) coordinates.
       @return a vector containing the RP coordinates in the structural frame. */
   const FGColumnVector3& GetXYZrp(void) const { return vXYZrp; }
@@ -163,6 +165,8 @@ public:
   void SetXYZrp(int idx, double value) {vXYZrp(idx) = value;}
 
   void SetWingArea(double S) {WingArea = S;}
+
+  double CalculateLeadingEdgeTemp();
 
   struct Inputs {
     FGColumnVector3 AeroForce;
@@ -188,7 +192,9 @@ private:
   double WingArea, WingSpan, cbar, WingIncidence;
   double HTailArea, VTailArea, HTailArm, VTailArm;
   double lbarh,lbarv,vbarh,vbarv;
+  double leadingEdgeTemp;
   std::string AircraftName;
+  DAWallTempEstimation tempEstimator;
 
   void bind(void);
   void unbind(void);
