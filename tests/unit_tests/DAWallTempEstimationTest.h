@@ -24,9 +24,14 @@ private:
     double _soundSpeed_ms;
     int _maxIterations=30;
     
-    double METER_TO_FEET_ = 1.0/0.3048;
+    double METER_TO_FEET_ = 1/0.3048;
     double KELVIN_TO_RANKINE_ = 1.8;
-    double PASCAL_TO_PSF_ = 1.0/47.880208;
+    double PASCAL_TO_PSF_ = 1/47.880208;
+
+    double FEET_TO_METER_ = 0.3048;
+    double RANKINE_TO_KELVIN_ = 1/1.8;
+    double PSF_TO_PASCAL_ = 47.880208;
+
 
     void setupTest() {
       DAWallTempEstimation();
@@ -78,7 +83,7 @@ public:
       _soundSpeed_ms = 299.4659948926586 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,1)), -10);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,1)), -10);
     }
 
     // Mach 1 at 10k laminar flow
@@ -90,7 +95,7 @@ public:
       _soundSpeed_ms = 299.4659948926586 * METER_TO_FEET_;
       setupTest();
       flowType_ = 0;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,1)), -12);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,1)), -12);
     }
 
     // Mach 2.04 at 18.3k turbulent flow
@@ -102,7 +107,7 @@ public:
       _soundSpeed_ms = 295.0722820056179 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,2.04)), 106);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,2.04)), 106);
     }
 
     // Mach 3.1 at 25k turbulent flow
@@ -114,7 +119,7 @@ public:
       _soundSpeed_ms = 298.4578021705926 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,3.1)), 326);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,3.1)), 326);
     }
 
     // Mach 4 at 30k turbulent flow
@@ -126,44 +131,44 @@ public:
       _soundSpeed_ms = 301.8053474426823 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,4.0)), 579);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,4.0)), 579);
     }
 
     //Mach speed of 0 breaks calc with zero division, 0.0001Ma = 0.12348kph
     void testMinMachSpeed() {
       setupTest();
       maxIterations=0;
-      GetWallTempEstimateCelsius(1.08,0);
+      GetWallTempEstimateCelsius(1,0);
       TS_ASSERT_EQUALS(machSpeed, 0.0001);
     }
 
     void testRegularMachSpeed() {
       setupTest();
       maxIterations=0;
-      GetWallTempEstimateCelsius(1.08,1.4);
+      GetWallTempEstimateCelsius(1,1.4);
       TS_ASSERT_EQUALS(machSpeed, 1.4);
     }
 
     void testChordConversion() {
       setupTest();
       maxIterations=0;
-      GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,1);
-      TS_ASSERT_EQUALS(chord_m, 1.08);
+      GetWallTempEstimateCelsius(1 * METER_TO_FEET_,1);
+      TS_ASSERT_EQUALS(round(chord_m), 1.0);
     }
 
     void testSetInputs() {
-      _airTemp_K = 216.65/(1.0/KELVIN_TO_RANKINE_); // Messy Math but else it fails
-      _airPressure_Pa = 7158.118362641401 * PASCAL_TO_PSF_;
-      _kinematicViscosity = 0.00012351261888837405;
-      _absoluteViscosity = 1.4216130796413358e-05;
-      _soundSpeed_ms = 295.0722820056179/(1.0/METER_TO_FEET_); // Messy Math but else it fails
+      _airTemp_K = 216.0 * KELVIN_TO_RANKINE_;
+      _airPressure_Pa = 7158.0 * PASCAL_TO_PSF_;
+      _kinematicViscosity = 0.0001;
+      _absoluteViscosity = 1.4e-05;
+      _soundSpeed_ms = 295.0 * FEET_TO_METER_;
       setupTest();
       SetInputs();
-      TS_ASSERT_EQUALS(airTemp_K, 216.65);
-      TS_ASSERT_EQUALS(airPressure_Pa, 7158.118362641401);
+      TS_ASSERT_EQUALS(airTemp_K, _airTemp_K * RANKINE_TO_KELVIN_);
+      TS_ASSERT_EQUALS(airPressure_Pa, _airPressure_Pa * PSF_TO_PASCAL_);
       TS_ASSERT_EQUALS(kinematicViscosity, _kinematicViscosity);
       TS_ASSERT_EQUALS(absoluteViscosity, _absoluteViscosity);
-      TS_ASSERT_EQUALS(soundSpeed_ms, _soundSpeed_ms / METER_TO_FEET_);
+      TS_ASSERT_EQUALS(soundSpeed_ms, _soundSpeed_ms * FEET_TO_METER_);
     }
 
     void testCalculateCpAndGammaWithTempBelow250() {
