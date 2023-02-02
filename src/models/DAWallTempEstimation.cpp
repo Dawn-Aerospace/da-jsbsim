@@ -12,15 +12,10 @@ namespace JSBSim {
       atmosphere_ = fdmex_->GetAtmosphere();
     }
 
-    double DAWallTempEstimation::GetWallTempEstimateCelsius(double _chord) {
+    double DAWallTempEstimation::GetWallTempEstimateCelsius(double _chord, double _machSpeed) {
       chord_m = _chord * FEET_TO_METER_;
-      machSpeed = fdmex_->GetPropertyValue("velocities/mach");
-      machSpeed = machSpeed < 0.0001 ? 0.0001 : machSpeed;
-      airTemp_K = atmosphere_->GetTemperature() * RANKINE_TO_KELVIN_;
-      airPressure_Pa = atmosphere_->GetPressure() * PSF_TO_PASCAL_;
-      kinematicViscosity = atmosphere_->GetKinematicViscosity();
-      absoluteViscosity = atmosphere_->GetAbsoluteViscosity();
-      soundSpeed_ms = atmosphere_->GetSoundSpeed() * FEET_TO_METER_;
+      machSpeed = _machSpeed < 0.0001 ? 0.0001 : _machSpeed;
+      SetInputs();
       velocity_ms = machSpeed * soundSpeed_ms;
       reynoldsNumber = velocity_ms * chord_m / kinematicViscosity;
       if (flowType_ == 0) {
@@ -40,21 +35,29 @@ namespace JSBSim {
       return DAWallTempEstimation::NewtonRaphson() + KELVIN_TO_CELSIUS_;
     }
 
+    void DAWallTempEstimation::SetInputs() {
+      airTemp_K = atmosphere_->GetTemperature() * RANKINE_TO_KELVIN_;
+      airPressure_Pa = atmosphere_->GetPressure() * PSF_TO_PASCAL_;
+      kinematicViscosity = atmosphere_->GetKinematicViscosity();
+      absoluteViscosity = atmosphere_->GetAbsoluteViscosity();
+      soundSpeed_ms = atmosphere_->GetSoundSpeed() * FEET_TO_METER_;
+    }
+
     double DAWallTempEstimation::HeatBalance(double estimate) const {
       double cp;
       double gm;
       tie(cp, gm) = CalculateCpAndGamma(airTemp_K);
-      double const Tref = 1 + a * pow(machSpeed, 2) + b * (estimate / airTemp_K - 1);
-      double const Pr = absoluteViscosity * cp / (2.64638e-3 * pow(airTemp_K, 1.5) / (airTemp_K + 245 * pow(10, (-12 / airTemp_K))));
-      double const q = 0.5 * gm * airPressure_Pa * pow(machSpeed, 2);
+      double const Tref = 1.0 + a * pow(machSpeed, 2.0) + b * (estimate / airTemp_K - 1.0);
+      double const Pr = absoluteViscosity * cp / (2.64638e-3 * pow(airTemp_K, 1.5) / (airTemp_K + 245.0 * pow(10.0, (-12.0 / airTemp_K))));
+      double const q = 0.5 * gm * airPressure_Pa * pow(machSpeed, 2.0);
       double const cf = cfi / (pow(Tref, NN));
-      double const r = flowType_ == 0? pow(Pr, 0.5) : pow(Pr, (1 / 3));
-      double const St = 0.5 * cf / pow(Pr, (2 / 3));
-      double const Twad = airTemp_K * (1 + 0.5 * r * (gm - 1) * pow(machSpeed, 2));
+      double const r = flowType_ == 0? pow(Pr, 0.5) : pow(Pr, (1.0 / 3.0));
+      double const St = 0.5 * cf / pow(Pr, (2.0 / 3.0));
+      double const Twad = airTemp_K * (1.0 + 0.5 * r * (gm - 1.0) * pow(machSpeed, 2.0));
       double const conducted = St * r * q * velocity_ms * (Twad - estimate) / (Twad - airTemp_K);
       double radiated = 0;
       if (machSpeed > 1.4) {
-        radiated = emissivity_ * sg * pow((estimate - airTemp_K), 4);
+        radiated = emissivity_ * sg * pow((estimate - airTemp_K), 4.0);
       }
       double const balance = conducted - radiated;
       return balance;
@@ -86,9 +89,8 @@ namespace JSBSim {
         cp = cp_arr[i - 1] + fraction * (cp_arr[i] - cp_arr[i - 1]);
         cv = cv_arr[i - 1] + fraction * (cv_arr[i] - cv_arr[i - 1]);
       }
-      cp = 1000 * cp;
-      cv = 1000 * cv;
       double const gamma = cp / cv;
+      cp = 1000 * cp;
       return {cp, gamma};
     }
 
@@ -108,19 +110,19 @@ namespace JSBSim {
         df = f1 - f0;
         df = 0.5 * df / dx;
         fx = HeatBalance(xs);
-        if (abs(fx) < tol) {
+        if (abs(fx) < tol_fx) {
           break;
         }
-        if (abs(df) < 1E-16) {
+        if (abs(df) < tol_df) {
           dx = 10 * dx;
         } else {
           xs = xs - fx / df;
         }
-        if (xs < 10) {
+        if (xs < xMin) {
           xs = 10;
           break;
         }
-        if (xs > 1000){
+        if (xs > xMax){
           xs = 1000;
           break;
         }

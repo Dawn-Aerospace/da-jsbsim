@@ -173,7 +173,7 @@ bool FGAircraft::Load(Element* el)
 
 double FGAircraft::CalculateLeadingEdgeTemp()
 {
-  leadingEdgeTemp = tempEstimator.GetWallTempEstimateCelsius(cbar);
+  leadingEdgeTemp = tempEstimator.GetWallTempEstimateCelsius(cbar, FDMExec->GetPropertyValue("velocities/mach"));
   return leadingEdgeTemp;
 }
 
