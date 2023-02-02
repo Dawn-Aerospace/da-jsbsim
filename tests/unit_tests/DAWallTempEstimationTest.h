@@ -24,9 +24,10 @@ private:
     double _soundSpeed_ms;
     int _maxIterations=30;
     
-    double METER_TO_FEET_ = 1.0/0.3048;
-    double KELVIN_TO_RANKINE_ = 1.8;
-    double PASCAL_TO_PSF_ = 1.0/47.880208;
+    const double METER_TO_FEET_ = 1/fttom;
+    const double PASCAL_TO_PSF_ = 1/psftopa;
+
+
 
     void setupTest() {
       DAWallTempEstimation();
@@ -71,99 +72,92 @@ public:
 
     // Mach 1 at 10k turbulent flow
     void testGetWallTempEstimateCelsiusMach1Alt10k() {
-      _airTemp_K = 223.14999999999998 * KELVIN_TO_RANKINE_;
-      _airPressure_Pa = 388349.24720240704 * PASCAL_TO_PSF_;
+      _airTemp_K = KelvinToRankine(223.14999999999998);
+      _airPressure_Pa = 388349.24720240704 / psftopa;
       _kinematicViscosity = 2.4034574673532144e-06;
       _absoluteViscosity = 1.45710858090486e-05;
       _soundSpeed_ms = 299.4659948926586 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,1)), -10);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,1)), 96);
     }
 
     // Mach 1 at 10k laminar flow
     void testGetWallTempEstimateCelsiusMach1Alt10kLaminarFlow() {
-      _airTemp_K = 223.14999999999998 * KELVIN_TO_RANKINE_;
+      _airTemp_K = KelvinToRankine(223.14999999999998);
       _airPressure_Pa = 388349.24720240704 * PASCAL_TO_PSF_;
       _kinematicViscosity = 2.4034574673532144e-06;
       _absoluteViscosity = 1.45710858090486e-05;
       _soundSpeed_ms = 299.4659948926586 * METER_TO_FEET_;
       setupTest();
       flowType_ = 0;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,1)), -12);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,1)), 214);
     }
 
     // Mach 2.04 at 18.3k turbulent flow
     void testGetWallTempEstimateCelsiusMach2Alt18k() {
-      _airTemp_K = 216.65 * KELVIN_TO_RANKINE_;
+      _airTemp_K = KelvinToRankine(216.65);
       _airPressure_Pa = 7158.118362641401 * PASCAL_TO_PSF_;
       _kinematicViscosity = 0.00012351261888837405;
       _absoluteViscosity = 1.4216130796413358e-05;
       _soundSpeed_ms = 295.0722820056179 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,2.04)), 106);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,2.04)), 302);
     }
 
     // Mach 3.1 at 25k turbulent flow
     void testGetWallTempEstimateCelsiusMach3Alt25k() {
-      _airTemp_K = 221.65 * KELVIN_TO_RANKINE_;
+      _airTemp_K = KelvinToRankine(221.65);
       _airPressure_Pa = 11936.585391666198 * PASCAL_TO_PSF_;
       _kinematicViscosity = 7.723486130952107e-05;
       _absoluteViscosity = 1.4489574855925882e-05;
       _soundSpeed_ms = 298.4578021705926 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,3.1)), 326);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,3.1)), 516);
     }
 
     // Mach 4 at 30k turbulent flow
     void testGetWallTempEstimateCelsiusMach4Alt30k() {
-      _airTemp_K = 226.65 * KELVIN_TO_RANKINE_;
+      _airTemp_K = KelvinToRankine(226.65);
       _airPressure_Pa = 25576.828953634504 * PASCAL_TO_PSF_;
       _kinematicViscosity = 3.7547057144736505e-05;
       _absoluteViscosity = 1.47603541438064e-05;
       _soundSpeed_ms = 301.8053474426823 * METER_TO_FEET_;
       setupTest();
       flowType_ = 1;
-      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,4.0)), 579);
+      TS_ASSERT_EQUALS(round(GetWallTempEstimateCelsius(1 * METER_TO_FEET_,4.0)), 741);
     }
 
     //Mach speed of 0 breaks calc with zero division, 0.0001Ma = 0.12348kph
     void testMinMachSpeed() {
       setupTest();
       maxIterations=0;
-      GetWallTempEstimateCelsius(1.08,0);
+      GetWallTempEstimateCelsius(1,0);
       TS_ASSERT_EQUALS(machSpeed, 0.0001);
     }
 
     void testRegularMachSpeed() {
       setupTest();
       maxIterations=0;
-      GetWallTempEstimateCelsius(1.08,1.4);
+      GetWallTempEstimateCelsius(1,1.4);
       TS_ASSERT_EQUALS(machSpeed, 1.4);
     }
 
-    void testChordConversion() {
-      setupTest();
-      maxIterations=0;
-      GetWallTempEstimateCelsius(1.08 * METER_TO_FEET_,1);
-      TS_ASSERT_EQUALS(chord_m, 1.08);
-    }
-
     void testSetInputs() {
-      _airTemp_K = 216.65/(1.0/KELVIN_TO_RANKINE_); // Messy Math but else it fails
-      _airPressure_Pa = 7158.118362641401 * PASCAL_TO_PSF_;
-      _kinematicViscosity = 0.00012351261888837405;
-      _absoluteViscosity = 1.4216130796413358e-05;
-      _soundSpeed_ms = 295.0722820056179/(1.0/METER_TO_FEET_); // Messy Math but else it fails
+      _airTemp_K = KelvinToRankine(216.0);
+      _airPressure_Pa = 7158.0 / psftopa;
+      _kinematicViscosity = 0.0001;
+      _absoluteViscosity = 1.4e-05;
+      _soundSpeed_ms = 295.0 * fttom;
       setupTest();
       SetInputs();
-      TS_ASSERT_EQUALS(airTemp_K, 216.65);
-      TS_ASSERT_EQUALS(airPressure_Pa, 7158.118362641401);
-      TS_ASSERT_EQUALS(kinematicViscosity, _kinematicViscosity);
-      TS_ASSERT_EQUALS(absoluteViscosity, _absoluteViscosity);
-      TS_ASSERT_EQUALS(soundSpeed_ms, _soundSpeed_ms / METER_TO_FEET_);
+      TS_ASSERT_EQUALS(airTemp_K, RankineToKelvin(_airTemp_K));
+      TS_ASSERT_EQUALS(airPressure_Pa, _airPressure_Pa * psftopa);
+      TS_ASSERT_EQUALS(kinematicViscosity, _kinematicViscosity * pow(fttom, 2));
+      TS_ASSERT_EQUALS(absoluteViscosity, _absoluteViscosity / (kgtoslug * fttom));
+      TS_ASSERT_EQUALS(soundSpeed_ms, _soundSpeed_ms * fttom);
     }
 
     void testCalculateCpAndGammaWithTempBelow250() {

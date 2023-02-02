@@ -195,7 +195,7 @@ void FGAircraft::bind(void)
   PropertyManager->Tie("metrics/lv-norm", this, &FGAircraft::Getlbarv);
   PropertyManager->Tie("metrics/vbarh-norm", this, &FGAircraft::Getvbarh);
   PropertyManager->Tie("metrics/vbarv-norm", this, &FGAircraft::Getvbarv);
-  PropertyManager->Tie("metrics/leadingEdgeTemp-cel", this, &FGAircraft::GetLeadingEdgeTemp);
+  PropertyManager->Tie("metrics/leading-edge-temp-cel", this, &FGAircraft::GetLeadingEdgeTemp);
   PropertyManager->Tie("metrics/aero-rp-x-in", this, eX, (PMF)&FGAircraft::GetXYZrp, &FGAircraft::SetXYZrp);
   PropertyManager->Tie("metrics/aero-rp-y-in", this, eY, (PMF)&FGAircraft::GetXYZrp, &FGAircraft::SetXYZrp);
   PropertyManager->Tie("metrics/aero-rp-z-in", this, eZ, (PMF)&FGAircraft::GetXYZrp, &FGAircraft::SetXYZrp);
