@@ -368,6 +368,7 @@ private:
   double ExternalFlow;
   bool  Selected;
   int Priority, InitialPriority;
+  bool has_drain_location;
 
   void CalculateInertias(void);
   void bind(FGPropertyManager* PropertyManager);
