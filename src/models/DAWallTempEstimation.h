@@ -32,7 +32,7 @@ protected:
     virtual void SetInputs();
 
     double HeatBalance(double estimate) const;
-    std::tuple<double, double> static CalculateCpAndGamma(double estimate);
+    std::tuple<double, double> static CalculateCpAndGamma(double temperature);
     double NewtonRaphson();
 
 private:

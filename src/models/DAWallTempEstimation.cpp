@@ -48,7 +48,7 @@ namespace JSBSim {
       double gm;
       tie(cp, gm) = CalculateCpAndGamma(airTemp_K);
       double const Tref = 1.0 + a * pow(machSpeed, 2.0) + b * (estimate / airTemp_K - 1.0);
-      double const Pr = absoluteViscosity * cp / (2.64638e-3 * pow(airTemp_K, 1.5) / (airTemp_K + 245.0 * pow(10.0, (-12.0 / airTemp_K))));
+      double const Pr = absoluteViscosity * cp * (airTemp_K + 245.0 * pow(10.0, (-12.0 / airTemp_K)))/ (2.64638e-3 * pow(airTemp_K, 1.5));
       double const q = 0.5 * gm * airPressure_Pa * pow(machSpeed, 2.0);
       double const cf = cfi / (pow(Tref, NN));
       double const r = flowType_ == 0? pow(Pr, 0.5) : pow(Pr, (1.0 / 3.0));
@@ -63,7 +63,7 @@ namespace JSBSim {
       return balance;
     }
 
-    std::tuple<double, double> DAWallTempEstimation::CalculateCpAndGamma(double estimate) {
+    std::tuple<double, double> DAWallTempEstimation::CalculateCpAndGamma(double temperature) {
       vector<int> T_arr = {250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500};
       vector<double> cp_arr = {1.003, 1.005, 1.008, 1.013, 1.02, 1.029, 1.04, 1.051, 1.063, 1.075, 1.087, 1.099, 1.121, 1.142, 1.155,
               1.173, 1.19, 1.204, 1.216};
@@ -73,7 +73,7 @@ namespace JSBSim {
       double cv;
       int i = -1;
       for (int n =0; n< T_arr.size(); n++) {
-        if (estimate < T_arr[n]) {
+        if (temperature < T_arr[n]) {
           i = n;
           break;
         }
@@ -85,7 +85,7 @@ namespace JSBSim {
         cp = cp_arr[0];
         cv = cv_arr[0];
       } else {
-        double const fraction = (estimate - T_arr[i - 1]) / (T_arr[i] - T_arr[i - 1]);
+        double const fraction = (temperature - T_arr[i - 1]) / (T_arr[i] - T_arr[i - 1]);
         cp = cp_arr[i - 1] + fraction * (cp_arr[i] - cp_arr[i - 1]);
         cv = cv_arr[i - 1] + fraction * (cv_arr[i] - cv_arr[i - 1]);
       }
