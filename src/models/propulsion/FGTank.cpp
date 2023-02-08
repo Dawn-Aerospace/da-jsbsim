@@ -83,10 +83,12 @@ FGTank::FGTank(FGFDMExec* exec, Element* el, int tank_number)
                      << endl;
 
   vXYZ_drain = vXYZ; // Set initial drain location to initial tank CG
+  has_drain_location = false; // Assume tank does not have a drain location defined
 
   element = el->FindElement("drain_location");
   if (element)  {
     vXYZ_drain = element->FindElementTripletConvertTo("IN");
+    has_drain_location = true;
   }
 
   if (el->FindElement("radius"))
@@ -253,14 +255,22 @@ void FGTank::ResetToIC(void)
 
 FGColumnVector3 FGTank::GetXYZ(void) const
 {
-  return vXYZ_drain + (Contents/Capacity)*(vXYZ - vXYZ_drain);
+  if (has_drain_location) {
+    return vXYZ_drain + (Contents/Capacity)*(vXYZ - vXYZ_drain);
+  } else {
+    return vXYZ;
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGTank::GetXYZ(int idx) const
 {
-  return vXYZ_drain(idx) + (Contents/Capacity)*(vXYZ(idx)-vXYZ_drain(idx));
+  if (has_drain_location) {
+    return vXYZ_drain(idx) + (Contents/Capacity)*(vXYZ(idx)-vXYZ_drain(idx));
+  } else {
+    return vXYZ(idx);
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

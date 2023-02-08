@@ -1,4 +1,5 @@
-# cython: language_level=2
+# cython: language_level=3
+# distutils: language=c++
 #
 # PyJSBSim a JSBSim python interface using cython.
 #
@@ -65,9 +66,20 @@ cdef extern from "initialization/FGLinearization.h" namespace "JSBSim":
 
 
 cdef extern from "input_output/FGPropertyManager.h" namespace "JSBSim":
+    cdef cppclass c_FGPropertyNode "JSBSim::FGPropertyNode":
+        c_FGPropertyNode* GetNode(const string& path, bool create)
+        const string& GetName() const
+        const string& GetFullyQualifiedName() const
+        double getDoubleValue() const
+        void setDoubleValue(double value)
+
+cdef extern from "input_output/FGPropertyManager.h" namespace "JSBSim":
     cdef cppclass c_FGPropertyManager "JSBSim::FGPropertyManager":
         c_FGPropertyManager()
-        bool HasNode(string path) except +convertJSBSimToPyExc
+        c_FGPropertyManager(c_FGPropertyNode* root)
+        c_FGPropertyNode* GetNode()
+        c_FGPropertyNode* GetNode(const string& path, bool create)
+        bool HasNode(const string& path) except +convertJSBSimToPyExc
 
 cdef extern from "math/FGColumnVector3.h" namespace "JSBSim":
     cdef cppclass c_FGColumnVector3 "JSBSim::FGColumnVector3":
@@ -93,14 +105,14 @@ cdef extern from "models/FGAircraft.h" namespace "JSBSim":
         c_FGColumnVector3& GetXYZrp()
 
 cdef extern from "models/FGAtmosphere.h" namespace "JSBSim":
-    cdef enum eTemperature "JSBSim::FGAtmosphere::eTemperature":
+    cdef enum c_eTemperature "JSBSim::FGAtmosphere::eTemperature":
         eNoTempUnit = 0,
         eFahrenheit = 1,
         eCelsius    = 2,
         eRankine    = 3,
         eKelvin     = 4
 
-    cdef enum ePressure "JSBSim::FGAtmosphere::ePressure":
+    cdef enum c_ePressure "JSBSim::FGAtmosphere::ePressure":
         eNoPressUnit= 0,
         ePSF        = 1,
         eMillibars  = 2,
@@ -109,8 +121,8 @@ cdef extern from "models/FGAtmosphere.h" namespace "JSBSim":
 
     cdef cppclass c_FGAtmosphere "JSBSim::FGAtmosphere":
         double GetTemperature(double h)
-        void SetTemperature(double t, double h, eTemperature unit)
-        void SetPressureSL(ePressure unit, double pressure)
+        void SetTemperature(double t, double h, c_eTemperature unit)
+        void SetPressureSL(c_ePressure unit, double pressure)
 
 cdef extern from "models/FGAuxiliary.h" namespace "JSBSim":
     cdef cppclass c_FGAuxiliary "JSBSim::FGAuxiliary":
