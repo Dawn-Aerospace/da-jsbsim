@@ -612,7 +612,7 @@ public:
 
   auto GetRandomGenerator(void) const { return RandomGenerator; }
 
-private:
+protected:
   unsigned int Frame;
   unsigned int IdFDM;
   int disperse;
