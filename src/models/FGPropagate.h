@@ -415,8 +415,7 @@ public:
       relative to the Local frame. The relevant arguments for the elements returned 
       by this call are the elements of the vector starting at index 1 
       (e.g. q0=1, q1=2, q2=3, q2=4).
-      units radians
-      @return An Quaternion element.
+      @return A Quaternion element.
   */
   double GetQuaternion(int idx) const { return VState.qAttitudeLocal.Entry(idx); }
 
