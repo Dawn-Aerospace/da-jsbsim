@@ -685,7 +685,7 @@ protected:
   bool ReadPrologue(Element*);
   void SRand(int sr);
   int  SRand(void) const {return RandomSeed;}
-  void LoadInputs(unsigned int idx);
+  virtual void LoadInputs(unsigned int idx);
   void LoadPlanetConstants(void);
   void LoadModelConstants(void);
   bool Allocate(void);
