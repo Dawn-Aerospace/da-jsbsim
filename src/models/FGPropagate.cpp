@@ -882,6 +882,11 @@ void FGPropagate::bind(void)
   PropertyManager->Tie("attitude/pitch-rad", this, (int)eTht, (PMF)&FGPropagate::GetEuler);
   PropertyManager->Tie("attitude/heading-true-rad", this, (int)ePsi, (PMF)&FGPropagate::GetEuler);
 
+  PropertyManager->Tie("attitude/local-quaternion-0", this, 1, (PMF)&FGPropagate::GetQuaternion);
+  PropertyManager->Tie("attitude/local-quaternion-1", this, 2, (PMF)&FGPropagate::GetQuaternion);
+  PropertyManager->Tie("attitude/local-quaternion-2", this, 3, (PMF)&FGPropagate::GetQuaternion);
+  PropertyManager->Tie("attitude/local-quaternion-3", this, 4, (PMF)&FGPropagate::GetQuaternion);
+
   PropertyManager->Tie("orbital/specific-angular-momentum-ft2_sec", &h);
   PropertyManager->Tie("orbital/inclination-deg", &Inclination);
   PropertyManager->Tie("orbital/right-ascension-deg", &RightAscension);

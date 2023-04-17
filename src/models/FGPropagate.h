@@ -410,6 +410,15 @@ public:
   */
   double GetSinEuler(int idx) const { return VState.qAttitudeLocal.GetSinEuler(idx); }
 
+  /** Retrieves an element of the vehicle Quaternion vector.
+      Retrieves an element of the quaternion that stores the vehicle orientation 
+      relative to the Local frame. The relevant arguments for the elements returned 
+      by this call are the elements of the vector starting at index 1 
+      (e.g. q0=1, q1=2, q2=3, q2=4).
+      @return A Quaternion element.
+  */
+  double GetQuaternion(int idx) const { return VState.qAttitudeLocal.Entry(idx); }
+
   /** Returns the current altitude rate.
       Returns the current altitude rate (rate of climb).
       units ft/sec
