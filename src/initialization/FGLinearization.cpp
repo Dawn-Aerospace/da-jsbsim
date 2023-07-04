@@ -39,6 +39,7 @@ FGLinearization::FGLinearization(FGFDMExec * FDMExec, double h)
     ss.x.add(new FGStateSpace::Alpha);
     ss.x.add(new FGStateSpace::Theta);
     ss.x.add(new FGStateSpace::Q);
+    ss.x.add(new FGStateSpace::Gamma);
 
     
     // get propulsion pointer to determine type/ etc.
@@ -63,6 +64,7 @@ FGLinearization::FGLinearization(FGFDMExec * FDMExec, double h)
     ss.x.add(new FGStateSpace::Phi);
     ss.x.add(new FGStateSpace::P);
     ss.x.add(new FGStateSpace::R);
+    ss.x.add(new FGStateSpace::Psi);
 
 
     ss.u.add(new FGStateSpace::ThrottleCmd);

@@ -315,7 +315,7 @@ public:
             return (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetAccelerations()->GetUVWdot(1) +
                     m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetAccelerations()->GetUVWdot(2) +
                     m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetAccelerations()->GetUVWdot(3))/
-                   m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
+                    m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
         }
 
     };
@@ -419,6 +419,32 @@ public:
         }
     };
 
+       class Gamma : public Component
+    {
+    public:
+        Gamma() : Component("Gamma","rad") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetEuler(2);
+        }
+        void set(double val)
+        {
+			m_fdm->GetIC()->SetFlightPathAngleRadIC(val);
+            double beta = m_fdm->GetIC()->GetBetaDegIC();
+            double psi = m_fdm->GetIC()->GetPsiRadIC();
+            double theta = m_fdm->GetIC()->GetThetaRadIC();
+            m_fdm->GetIC()->SetAlphaRadIC(theta-val);
+            m_fdm->GetIC()->SetBetaRadIC(beta);
+            m_fdm->GetIC()->SetPsiRadIC(psi);
+            m_fdm->GetIC()->SetThetaRadIC(theta);
+        }
+        double getDeriv() const
+        {
+            return m_fdm->GetAuxiliary()->GetEulerRates(2) - m_fdm->GetAuxiliary()->Getadot();
+        }
+    };
+
+    
     class Q : public Component
     {
     public:

@@ -1250,7 +1250,7 @@ void FGFDMExec::DoTrim(int mode)
     trim.Report();
 
   if (!success)
-    throw TrimFailureException("Trim Failed");
+    throw TrimFailureException("Trim Failed DoTrim");
 
   trim_completed = 1;
 }
@@ -1275,7 +1275,7 @@ double trim_result = 0.0;
    }
    else {
         trim_result = 2.0; //trim_failed;
-            //throw TrimFailureException("Trim Failed");
+            //throw TrimFailureException("Trim Failed DoTrimSimulink");
   };
 
   return trim_result;
