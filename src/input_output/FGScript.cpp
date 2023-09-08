@@ -142,8 +142,8 @@ bool FGScript::LoadScript(const SGPath& script, double default_dT,
     dt = run_element->GetAttributeValueAsNumber("dt");
   else {
     dt = default_dT;
-    cout << endl << "Overriding simulation step size from the command line. New step size is: "
-         << default_dT << " seconds (" << 1/default_dT << " Hz)" << endl << endl;
+    //cout << endl << "Overriding simulation step size from the command line. New step size is: "
+     //    << default_dT << " seconds (" << 1/default_dT << " Hz)" << endl << endl;
   }
 
   FDMExec->Setdt(dt);
