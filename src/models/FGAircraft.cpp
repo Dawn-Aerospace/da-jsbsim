@@ -49,7 +49,7 @@ namespace JSBSim {
 CLASS IMPLEMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-FGAircraft::FGAircraft(FGFDMExec* fdmex) : FGModel(fdmex)
+FGAircraft::FGAircraft(FGFDMExec* fdmex) : FGModel(fdmex), tempEstimator(DAWallTempEstimation(fdmex))
 {
   Name = "FGAircraft";
   WingSpan = 0.0;
@@ -60,7 +60,6 @@ FGAircraft::FGAircraft(FGFDMExec* fdmex) : FGModel(fdmex)
   lbarh = lbarv = 0.0;
   vbarh = vbarv = 0.0;
   WingIncidence = 0.0;
-
   bind();
 
   Debug(0);
@@ -105,6 +104,8 @@ bool FGAircraft::Run(bool Holding)
   vMoments += in.GroundMoment;
   vMoments += in.ExternalMoment;
   vMoments += in.BuoyantMoment;
+
+  CalculateLeadingEdgeTemp();
 
   RunPostFunctions();
 
@@ -168,6 +169,14 @@ bool FGAircraft::Load(Element* el)
   return true;
 }
 
+
+
+double FGAircraft::CalculateLeadingEdgeTemp()
+{
+  leadingEdgeTemp = tempEstimator.GetWallTempEstimateCelsius(cbar, FDMExec->GetPropertyValue("velocities/mach"));
+  return leadingEdgeTemp;
+}
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGAircraft::bind(void)
@@ -186,6 +195,7 @@ void FGAircraft::bind(void)
   PropertyManager->Tie("metrics/lv-norm", this, &FGAircraft::Getlbarv);
   PropertyManager->Tie("metrics/vbarh-norm", this, &FGAircraft::Getvbarh);
   PropertyManager->Tie("metrics/vbarv-norm", this, &FGAircraft::Getvbarv);
+  PropertyManager->Tie("metrics/leadingEdgeTemp-cel", this, &FGAircraft::GetLeadingEdgeTemp);
   PropertyManager->Tie("metrics/aero-rp-x-in", this, eX, (PMF)&FGAircraft::GetXYZrp, &FGAircraft::SetXYZrp);
   PropertyManager->Tie("metrics/aero-rp-y-in", this, eY, (PMF)&FGAircraft::GetXYZrp, &FGAircraft::SetXYZrp);
   PropertyManager->Tie("metrics/aero-rp-z-in", this, eZ, (PMF)&FGAircraft::GetXYZrp, &FGAircraft::SetXYZrp);
