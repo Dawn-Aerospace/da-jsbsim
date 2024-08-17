@@ -260,13 +260,6 @@ public:
       @return feather command for the given engine (on / off)*/
   bool GetFeatherCmd(int engine) const { return PropFeatherCmd[engine]; }
 
-  /** Gets the [rocket] engine operation mode command.
-      @param engine engine ID number
-      @return operation mode command for the given engine, returns -1 / 0 / 1 */
-  double GetOperationModeCmd(int engine) const;
-
-  const std::vector<double>& GetOperationModeCmd() const {return OperationModeCmd;}
-
   /** Gets the pitch trim command.
       @return pitch trim command in range from -1.0 to 1.0 */
   double GetPitchTrimCmd(void) const { return PTrimCmd; }
@@ -361,13 +354,6 @@ public:
   bool GetPropFeather(int engine) const { return PropFeather[engine]; }
 
   const std::vector<bool>& GetPropFeather() const { return PropFeather; }
-
-  /** Gets the [rocket] engine operation mode.
-      @param engine engine ID number
-      @return operation mode for the given engine, returns -1 / 0 / 1 */
-  double GetOperationMode(int engine) const;
-
-  const std::vector<double>& GetOperationMode() const {return OperationMode;}
   //@}
 
   /** Retrieves all component names for inclusion in output stream
@@ -447,11 +433,6 @@ public:
       @param cmd feather (bool)*/
   void SetFeatherCmd(int engine, bool cmd);
   //@}
-  
-  /** Sets the operation mode command for the specified [rocket] engine
-      @param engine engine ID number
-      @param mode command -1 for off, 0 for monoprop, 1 for biprop */
-  void SetOperationModeCmd(int engine, double mode);
 
   /// @name Aerosurface position setting
   //@{
@@ -516,10 +497,6 @@ public:
   void SetPropFeather(int engine, bool cmd);
   //@}
 
-  /** Sets the actual operation mode for the specified [rocket] engine
-      @param engine engine ID number
-      @param mode -1 for off, 0 for monoprop, 1 for biprop */
-  void SetOperationMode(int engine, double mode);
 
     /// @name Landing Gear brakes
   //@{
@@ -587,8 +564,6 @@ private:
   std::vector <double> PropAdvance;
   std::vector <bool> PropFeatherCmd;
   std::vector <bool> PropFeather;
-  std::vector <double> OperationModeCmd;
-  std::vector <double> OperationMode;
 
   //double LeftBrake, RightBrake, CenterBrake; // Brake settings
   std::vector <double> BrakePos; // left, center, right - defined by FGLGear:: enum

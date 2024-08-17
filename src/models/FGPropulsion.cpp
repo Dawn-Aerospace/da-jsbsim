@@ -76,8 +76,8 @@ FGPropulsion::FGPropulsion(FGFDMExec* exec) : FGModel(exec)
 
   ActiveEngine = -1; // -1: ALL, 0: Engine 1, 1: Engine 2 ...
   tankJ.InitMatrix();
-  DumpRate = 0.0;
-  RefuelRate = 6000.0;
+  DumpRate = 500.0; // lbs/min
+  RefuelRate = 6000.0; // lbs/min
   FuelFreeze = false;
 
   Debug(0);
@@ -417,8 +417,6 @@ bool FGPropulsion::Load(Element* el)
 
     engine_element = el->FindNextElement("engine");
   }
-
-  static bool properties_bound = false;
 
   if (numEngines && !properties_bound) {
     properties_bound = true;
@@ -779,7 +777,6 @@ void FGPropulsion::DoRefuel(double time_slice)
 void FGPropulsion::DumpFuel(double time_slice)
 {
   int TanksDumping = 0;
-
   for (const auto& tank: Tanks) {
     if (tank->GetContents() > tank->GetStandpipe()) ++TanksDumping;
   }

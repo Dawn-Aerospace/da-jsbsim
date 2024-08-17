@@ -127,7 +127,6 @@ public:
     std::vector <double> MixturePos;
     std::vector <double> PropAdvance;
     std::vector <bool> PropFeather;
-    std::vector <double> OperationMode;
     double TotalDeltaT;
   };
 

@@ -41,6 +41,7 @@ INCLUDES
 #include "FGEngine.h"
 #include "math/FGTable.h"
 #include "math/FGFunction.h"
+#include "DARocketState.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
@@ -168,7 +169,11 @@ public:
   double GetMixtureRatio(void) const {return MxR;}
 
   double GetIsp(void) const {return Isp;}
-  
+
+  int GetStartState() const {return StartState;}
+
+  void SetStartState(int StartState);
+
   double GetOperationMode(void) const {return OpMode;}
   
   void SetMixtureRatio(double mix) {MxR = mix;}
@@ -204,12 +209,14 @@ public:
   /** Returns the Total Isp variation, if any. */
   double GetTotalIspVariation(void) const {return TotalIspVariation;}
 
+
 private:
   /** Returns the vacuum thrust.
       @return The vacuum thrust in lbs. */
   double GetVacThrust(void) const {return VacThrust;}
 
   void bindmodel(FGPropertyManager* pm);
+
 
   double Isp; // Vacuum Isp
   double It;    // Total actual Isp
@@ -230,9 +237,9 @@ private:
   bool Flameout;
   double BuildupTime;
 
+  int StartState = SAFE;
   int OpMode;
 
-  enum {eModeOff = -1, eModeMonoProp, eModeBiProp};
 
   double PropFlowConversion;
 
@@ -242,6 +249,8 @@ private:
   FGFunction* mxr_function;
   
   FGFDMExec* FDMExec;
+
+  DARocketState state;
 
   void Debug(int from);
 };

@@ -18,7 +18,7 @@
 # this program; if not, see <http://www.gnu.org/licenses/>
 #
 
-from JSBSim_utils import JSBSimTestCase
+from JSBSim_utils import JSBSimTestCase, RunTest
 
 
 class TestUnusableFuel(JSBSimTestCase):
@@ -58,3 +58,6 @@ class TestUnusableFuel(JSBSimTestCase):
             fdm["propulsion/tank[1]/unusable-volume-gal"],
             fdm["propulsion/tank[1]/contents-volume-gal"],
         )
+
+
+RunTest(TestUnusableFuel)

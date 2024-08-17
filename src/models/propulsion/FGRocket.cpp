@@ -54,7 +54,7 @@ CLASS IMPLEMENTATION
 FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Inputs& input)
   : FGEngine(engine_number, input),
     isp_function(nullptr), propflow_function(nullptr), mxr_function(nullptr),
-    FDMExec(exec)
+    FDMExec(exec), state(DARocketState(exec))
 {
   Load(exec, el);
 
@@ -76,10 +76,10 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
   TotalIspVariation = 0.0;
   VacThrust = 0.0;
   Flameout = false;
-  OpMode = -1;
+  OpMode = state.GetState();
   PropFlowConversion = 1.0;
 
-  // Defaults
+    // Defaults
    MinThrottle = 0.0;
    MaxThrottle = 1.0;
 
@@ -88,6 +88,14 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
 
   auto PropertyManager = exec->GetPropertyManager();
   bindmodel(PropertyManager.get()); // Bind model properties first, since they might be needed in functions.
+
+  state.BindStateTransitionTimes();
+
+  Element* StartStateExists = el->FindElement("start_state");
+  if (StartStateExists) {
+    StartState = el->FindElementValueAsNumber("start_state");
+    FDMExec->SetPropertyValue("propulsion/engine/rocket/start-state", StartState);
+  }
 
   Element* isp_el = el->FindElement("isp");
 
@@ -173,7 +181,6 @@ FGRocket::FGRocket(FGFDMExec* exec, Element *el, int engine_number, struct Input
     }
   }
 
-
   Debug(0);
 }
 
@@ -192,6 +199,7 @@ void FGRocket::Calculate(void)
   if (FDMExec->IntegrationSuspended()) return;
 
   RunPreFunctions();
+  OpMode = state.GetState();
 
   PropellantFlowRate = (FuelExpended + OxidizerExpended) / in.TotalDeltaT;
   TotalPropellantExpended += FuelExpended + OxidizerExpended;
@@ -267,9 +275,7 @@ double FGRocket::CalcFuelNeed(void)
 
     if (mxr_function) MxR = mxr_function->GetValue();
 
-    OpMode = std::round(in.OperationMode[EngineNumber]);
-
-    if (OpMode == eModeMonoProp) {
+    if (OpMode == MONO_PROP) {
       SLFuelFlowMax = 0.0;
     } else {
       SLFuelFlowMax = PropFlowMax / (1 + MxR);
@@ -367,6 +373,16 @@ void FGRocket::bindmodel(FGPropertyManager* PropertyManager)
                                                        &FGRocket::SetIsp);
     property_name = base_property_name + "/operation-mode";
     PropertyManager->Tie( property_name.c_str(), this, &FGRocket::GetOperationMode);
+
+    property_name = base_property_name + "/rocket-state";
+    PropertyManager->Tie( property_name.c_str(), &state, &DARocketState::GetState, &DARocketState::SetState);
+
+    property_name = base_property_name + "/rocket/decay-state";
+    PropertyManager->Tie( property_name.c_str(), &state, &DARocketState::GetDecayState);
+
+    property_name = base_property_name + "/rocket/start-state";
+    PropertyManager->Tie( property_name.c_str(), &state, &DARocketState::GetState, &DARocketState::SetStartState);
+
   }
 }
 

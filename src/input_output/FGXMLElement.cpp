@@ -101,6 +101,9 @@ Element::Element(const string& nm)
     convert["LTR"]["GAL"] = convert["LTR"]["IN3"]*convert["IN3"]["GAL"];
     convert["M3"]["GAL"] = 1000.*convert["LTR"]["GAL"];
     convert["CC"]["GAL"] = convert["CC"]["IN3"]*convert["IN3"]["GAL"];
+    // Time
+    convert["SEC"]["MIN"] = 60.0;
+    convert["MIN"]["SEC"] = 1.0/convert["SEC"]["MIN"];
     // Mass & Weight
     convert["LBS"]["KG"] = 0.45359237;
     convert["KG"]["LBS"] = 1.0/convert["LBS"]["KG"];
@@ -165,8 +168,11 @@ Element::Element(const string& nm)
     // Mass flow
     convert["KG/MIN"]["LBS/MIN"] = convert["KG"]["LBS"];
     convert["KG/SEC"]["LBS/SEC"] = convert["KG"]["LBS"];
-    convert ["N/SEC"]["LBS/SEC"] = 0.224808943;
-    convert ["LBS/SEC"]["N/SEC"] = 1.0/convert ["N/SEC"]["LBS/SEC"];
+    convert["N/SEC"]["LBS/SEC"] = 0.224808943;
+    convert["LBS/SEC"]["N/SEC"] = 1.0/convert["N/SEC"]["LBS/SEC"];
+    convert["KG/SEC"]["LBS/MIN"] = convert["KG"]["LBS"] * convert["SEC"]["MIN"];
+    convert["KG/MIN"]["LBS/SEC"] = convert["KG"]["LBS"] * convert["MIN"]["SEC"];
+
     // Fuel Consumption
     convert["LBS/HP*HR"]["KG/KW*HR"] = 0.6083;
     convert["KG/KW*HR"]["LBS/HP*HR"] = 1.0/convert["LBS/HP*HR"]["KG/KW*HR"];
@@ -245,6 +251,7 @@ Element::Element(const string& nm)
     convert["KG/MIN"]["KG/MIN"] = 1.0;
     convert["LBS/MIN"]["LBS/MIN"] = 1.0;
     convert["N/SEC"]["N/SEC"] = 1.0;
+    convert["KG/SEC"]["KG/SEC"] = 1.0;
     // Fuel Consumption
     convert["LBS/HP*HR"]["LBS/HP*HR"] = 1.0;
     convert["KG/KW*HR"]["KG/KW*HR"] = 1.0;
@@ -258,6 +265,9 @@ Element::Element(const string& nm)
     convert["VOLTS"]["VOLTS"] = 1.0;
     convert["OHMS"]["OHMS"] = 1.0;
     convert["AMPERES"]["AMPERES"] = 1.0;
+    // Time
+    convert["SEC"]["SEC"] = 1.0;
+    convert["MIN"]["MIN"] = 1.0;
   }
 }
 
