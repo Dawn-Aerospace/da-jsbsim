@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+This reset file has been created on 01-Dec-2022 18:18:15 
+--> 
+<runscript name="Test script">  
+ <use aircraft="737" initialize="trim"/>   
+<run start="0" end="100" dt="0.002"> 
+<event name="Gear"> 
+<condition> simulation/sim-time-sec gt 0.0 </condition> 
+<set name="gear/gear-cmd-norm" value="0"/> 
+</event> 
+</run> 
+</runscript> 

@@ -905,6 +905,7 @@
   <property> fcs/throttle-cmd-norm[1] </property>
   <property> simulation/terminate </property> 
  </input>  
+    <output name="localhost" type="FLIGHTGEAR" protocol="UDP" port="5550" rate="60"/>
 
 </fdm_config>
 

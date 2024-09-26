@@ -77,7 +77,7 @@ CLASS IMPLEMENTATION
 const string FGJSBBase::needed_cfg_version = "2.0";
 const string FGJSBBase::JSBSim_version = JSBSIM_VERSION " " __DATE__ " " __TIME__ ;
 
-short FGJSBBase::debug_lvl  = 1;
+short FGJSBBase::debug_lvl  = 0; // Forced to Shup up
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -59,13 +59,12 @@ namespace JSBSim {
 /*****************************************************************************/
 
 FGTrimAxis::FGTrimAxis(FGFDMExec* fdex, FGInitialCondition* ic, State st,
-                       Control ctrl) {
+                       Control ctrl, double trim_tol) {
 
   fdmex=fdex;
   fgic=ic;
   state=st;
   control=ctrl;
-  max_iterations=10;
   control_value=0;
   its_to_stable_value=0;
   total_iterations=0;
@@ -75,14 +74,14 @@ FGTrimAxis::FGTrimAxis(FGFDMExec* fdex, FGInitialCondition* ic, State st,
   state_value=0;
   state_target=0;
   switch(state) {
-    case tUdot: tolerance = DEFAULT_TOLERANCE; break;
-    case tVdot: tolerance = DEFAULT_TOLERANCE; break;
-    case tWdot: tolerance = DEFAULT_TOLERANCE; break;
-    case tQdot: tolerance = DEFAULT_TOLERANCE / 10; break;
-    case tPdot: tolerance = DEFAULT_TOLERANCE / 10; break;
-    case tRdot: tolerance = DEFAULT_TOLERANCE / 10; break;
+    case tUdot: tolerance = trim_tol; break;
+    case tVdot: tolerance = trim_tol; break;
+    case tWdot: tolerance = trim_tol; break;
+    case tQdot: tolerance = trim_tol / 10; break;
+    case tPdot: tolerance = trim_tol / 10; break;
+    case tRdot: tolerance = trim_tol / 10; break;
     case tHmgt: tolerance = 0.01; break;
-    case  tNlf: state_target=1.0; tolerance = 1E-5; break;
+    case tNlf: state_target=1.0; tolerance = 1E-5; break;
     case tAll: break;
   }
 
@@ -110,10 +109,30 @@ FGTrimAxis::FGTrimAxis(FGFDMExec* fdex, FGInitialCondition* ic, State st,
     solver_eps=tolerance/100;
     break;
   case tPitchTrim:
+      control_min=-1;
+    control_max=1;
+    state_convert=radtodeg;
+    solver_eps=tolerance/100;
   case tElevator:
+      control_min=-1;
+    control_max=1;
+    state_convert=radtodeg;
+    solver_eps=tolerance/100;
   case tRollTrim:
+      control_min=-1;
+    control_max=1;
+    state_convert=radtodeg;
+    solver_eps=tolerance/100;
   case tAileron:
+      control_min=-1;
+    control_max=1;
+    state_convert=radtodeg;
+    solver_eps=tolerance/100;
   case tYawTrim:
+      control_min=-1;
+    control_max=1;
+    state_convert=radtodeg;
+    solver_eps=tolerance/100;
   case tRudder:
     control_min=-1;
     control_max=1;
@@ -188,9 +207,9 @@ void FGTrimAxis::getControl(void) {
   case tAlpha:     control_value=fdmex->GetAuxiliary()->Getalpha();  break;
   case tPitchTrim: control_value=fdmex->GetFCS() -> GetPitchTrimCmd(); break;
   case tElevator:  control_value=fdmex->GetFCS() -> GetDeCmd(); break;
-  case tRollTrim:
+  case tRollTrim:  control_value=fdmex->GetFCS() -> GetRollTrimCmd(); break;
   case tAileron:   control_value=fdmex->GetFCS() -> GetDaCmd(); break;
-  case tYawTrim:
+  case tYawTrim:   control_value=fdmex->GetFCS() -> GetYawTrimCmd(); break;
   case tRudder:    control_value=fdmex->GetFCS() -> GetDrCmd(); break;
   case tAltAGL:    control_value=fdmex->GetPropagate()->GetDistanceAGL();break;
   case tTheta:     control_value=fdmex->GetPropagate()->GetEuler(eTht); break;
@@ -229,9 +248,9 @@ void FGTrimAxis::setControl(void) {
   case tPitchTrim: fdmex->GetFCS()->SetPitchTrimCmd(control_value); break;
   case tElevator:  fdmex->GetFCS()->SetDeCmd(control_value); break;
   case tRollTrim:
-  case tAileron:   fdmex->GetFCS()->SetDaCmd(control_value); break;
+  case tAileron:   fdmex->GetFCS()->SetRollTrimCmd(control_value); break;
   case tYawTrim:
-  case tRudder:    fdmex->GetFCS()->SetDrCmd(control_value); break;
+  case tRudder:    fdmex->GetFCS()->SetYawTrimCmd(control_value); break;
   case tAltAGL:    fgic->SetAltitudeAGLFtIC(control_value); break;
   case tTheta:     fgic->SetThetaRadIC(control_value); break;
   case tPhi:       fgic->SetPhiRadIC(control_value); break;
@@ -294,7 +313,7 @@ void FGTrimAxis::AxisReport(void) {
   std::streamsize originalPrecision = cout.precision();
   std::streamsize originalWidth = cout.width();
   cout << "  " << setw(20) << GetControlName() << ": ";
-  cout << setw(6) << setprecision(2) << GetControl()*control_convert << ' ';
+  cout << setw(6) << setprecision(8) << GetControl()*control_convert << ' ';
   cout << setw(5) << GetStateName() << ": ";
   cout << setw(9) << setprecision(2) << scientific << GetState()+state_target;
   cout << " Tolerance: " << setw(3) << setprecision(0) << scientific << GetTolerance();

@@ -58,15 +58,13 @@ namespace JSBSim {
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-FGTrim::FGTrim(FGFDMExec *FDMExec,TrimMode tt)
+FGTrim::FGTrim(FGFDMExec *FDMExec,TrimMode tt, double trim_tol)
   : fgic(FDMExec)
 {
 
   Nsub=0;
   max_iterations=60;
   max_sub_iterations=100;
-  Tolerance=1E-3;
-  A_Tolerance = Tolerance / 10;
 
   Debug=0;DebugLevel=0;
   fdmex=FDMExec;
@@ -77,7 +75,7 @@ FGTrim::FGTrim(FGFDMExec *FDMExec,TrimMode tt)
   xlo=xhi=alo=ahi=0.0;
   targetNlf=fgic.GetTargetNlfIC();
   debug_axis=tAll;
-  SetMode(tt);
+  SetMode(tt,trim_tol);
   if (debug_lvl & 2) cout << "Instantiated: FGTrim" << endl;
 }
 
@@ -220,8 +218,7 @@ bool FGTrim::DoTrim(void) {
 
   //clear the sub iterations counts & zero out the controls
   for(unsigned int current_axis=0;current_axis<TrimAxes.size();current_axis++) {
-    //cout << current_axis << "  " << TrimAxes[current_axis]->GetStateName()
-    //<< "  " << TrimAxes[current_axis]->GetControlName()<< endl;
+    //cout << current_axis << "  " << TrimAxes[current_axis].GetStateName() << "  " << TrimAxes[current_axis].GetControlName()<< endl;
     xlo=TrimAxes[current_axis].GetControlMin();
     xhi=TrimAxes[current_axis].GetControlMax();
     TrimAxes[current_axis].SetControl((xlo+xhi)/2);
@@ -315,7 +312,7 @@ bool FGTrim::DoTrim(void) {
         cout << endl << "  Trim successful" << endl;
   } else { // The trim has failed
     total_its=N;
-
+    
     // Restore the aircraft parameters to their initial values
     fgic = *fdmex->GetIC();
     FCS->SetDeCmd(elevator0);
@@ -339,6 +336,7 @@ bool FGTrim::DoTrim(void) {
   fdmex->GetPropagate()->InitializeDerivatives();
   fdmex->ResumeIntegration();
   fdmex->SetTrimStatus(false);
+  
 
   for(int i=0;i < GroundReactions->GetNumGearUnits();i++)
     GroundReactions->GetGearUnit(i)->SetReport(true);
@@ -798,53 +796,59 @@ void FGTrim::setDebug(FGTrimAxis& axis) {
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void FGTrim::SetMode(TrimMode tt) {
+void FGTrim::SetMode(TrimMode tt, double trim_tol) {
     ClearStates();
     mode=tt;
     switch(tt) {
       case tFull:
-        if (debug_lvl > 0)
-          cout << "  Full Trim" << endl;
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim ));
+        cout << "  Trim mode: full" << endl;
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
         //TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tHmgt,tBeta ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tAileron ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tRudder ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tRollTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tLongitudinal:
-        if (debug_lvl > 0)
-          cout << "  Longitudinal Trim" << endl;
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim ));
+        cout << "  Trim mode: longitudinal" << endl;
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
         break;
       case tGround:
-        if (debug_lvl > 0)
-          cout << "  Ground Trim" << endl;
+        cout << "  Trim mode: ground" << endl;
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAltAGL ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tTheta ));
         TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tPhi ));
         break;
       case tPullup:
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tNlf,tAlpha ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tHmgt,tBeta ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tAileron ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tRudder ));
+        cout << "  Trim mode: pullup" << endl;
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tNlf,tAlpha,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tHmgt,tBeta,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tRollTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tTurn:
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tBeta ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tAileron ));
-        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tRudder ));
+        cout << "  Trim mode: turn" << endl;
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tUdot,tThrottle,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tBeta,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tRollTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
         break;
       case tCustom:
+        cout << "  Trim mode: attitude" << endl;
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tWdot,tAlpha,trim_tol));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tQdot,tPitchTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tVdot,tPhi,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tPdot,tRollTrim,trim_tol ));
+        TrimAxes.push_back(FGTrimAxis(fdmex,&fgic,tRdot,tYawTrim,trim_tol ));
+        break;
       case tNone:
         break;
     }

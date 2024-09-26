@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!-- 
+This reset file has been created on 01-Dec-2022 18:14:11 
+--> 
+<initialize name="trim.xml">
+ 
+ 
+  <ubody unit="M/SEC">   50 </ubody>
+  <latitude unit="DEG">   -43.9 </latitude>
+  <longitude unit="DEG">   170.12 </longitude>
+  <phi unit="RAD">   0.0045746 </phi>
+  <alpha unit="RAD">   -0.041541 </alpha>
+  <altitude unit="M">   800 </altitude>
+  <running unit="">   -1 </running>
+<gear-cmd-norm  unit=""> 0 </gear-cmd-norm> 
+ 
+ 
+</initialize>

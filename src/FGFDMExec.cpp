@@ -62,6 +62,7 @@ INCLUDES
 #include "input_output/FGScript.h"
 #include "input_output/FGXMLFileRead.h"
 #include "initialization/FGInitialCondition.h"
+#include "initialization/FGLinearization.h"
 
 using namespace std;
 
@@ -157,6 +158,7 @@ FGFDMExec::FGFDMExec(FGPropertyManager* root, std::shared_ptr<unsigned int> fdmc
   Constructing = true;
   typedef int (FGFDMExec::*iPMF)(void) const;
   instance->Tie("simulation/do_simple_trim", this, (iPMF)0, &FGFDMExec::DoTrim);
+  instance->Tie("simulation/do_linearization", this, (iPMF)0, &FGFDMExec::DoLinearization);
   instance->Tie("simulation/reset", this, (iPMF)0, &FGFDMExec::ResetToInitialConditions);
   instance->Tie("simulation/disperse", this, &FGFDMExec::GetDisperse);
   instance->Tie("simulation/randomseed", this, (iPMF)&FGFDMExec::SRand, &FGFDMExec::SRand);
@@ -511,7 +513,14 @@ void FGFDMExec::LoadInputs(unsigned int idx)
     Propulsion->in.AeroPQR          = Auxiliary->GetAeroPQR();
     Propulsion->in.alpha            = Auxiliary->Getalpha();
     Propulsion->in.beta             = Auxiliary->Getbeta();
-    Propulsion->in.TotalDeltaT      = dT * Propulsion->GetRate();
+        if (dT==0)
+    {
+      Propulsion->in.TotalDeltaT      = saved_dT* Propulsion->GetRate();
+    }
+    else
+    {
+      Propulsion->in.TotalDeltaT      = dT * Propulsion->GetRate();
+    }
     Propulsion->in.ThrottlePos      = FCS->GetThrottlePos();
     Propulsion->in.MixturePos       = FCS->GetMixturePos();
     Propulsion->in.ThrottleCmd      = FCS->GetThrottleCmd();
@@ -521,7 +530,6 @@ void FGFDMExec::LoadInputs(unsigned int idx)
     Propulsion->in.OperationMode    = FCS->GetOperationMode();
     Propulsion->in.H_agl            = Propagate->GetDistanceAGL();
     Propulsion->in.PQRi             = Propagate->GetPQRi();
-
     break;
   case eAerodynamics:
     Aerodynamics->in.Alpha     = Auxiliary->Getalpha();
@@ -893,17 +901,6 @@ bool FGFDMExec::LoadModel(const string& model, bool addModelToPath)
         FCS->AddThrottle();
     }
 
-    // Process the system element[s]. This element is OPTIONAL, and there may be more than one.
-    element = document->FindElement("system");
-    while (element) {
-      result = Models[eSystems]->Load(element);
-      if (!result) {
-        cerr << endl << "Aircraft system element has problems in file " << aircraftCfgFileName << endl;
-        return result;
-      }
-      element = document->FindNextElement("system");
-    }
-
     // Process the autopilot element. This element is OPTIONAL.
     element = document->FindElement("autopilot");
     if (element) {
@@ -934,6 +931,17 @@ bool FGFDMExec::LoadModel(const string& model, bool addModelToPath)
       }
     } else {
       cerr << endl << "No expected aerodynamics element was found in the aircraft config file." << endl;
+    }
+
+    // Process the system element[s]. This element is OPTIONAL, and there may be more than one.
+    element = document->FindElement("system");
+    while (element) {
+      result = Models[eSystems]->Load(element);
+      if (!result) {
+        cerr << endl << "Aircraft system element has problems in file " << aircraftCfgFileName << endl;
+        return result;
+      }
+      element = document->FindNextElement("system");
     }
 
     // Process the input element. This element is OPTIONAL, and there may be more than one.
@@ -1242,11 +1250,68 @@ void FGFDMExec::DoTrim(int mode)
     trim.Report();
 
   if (!success)
-    throw TrimFailureException("Trim Failed");
+    throw TrimFailureException("Trim Failed DoTrim");
 
   trim_completed = 1;
 }
 
+
+double FGFDMExec::DoTrimSimulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol)
+{
+double trim_result = 0.0;
+  if (mode < 0 || mode > JSBSim::tNone){ throw("Illegal trimming mode!");};
+   
+
+  FGTrim trim(this, (JSBSim::TrimMode)mode, trim_tol);
+  trim.SetMaxCycles(max_iter);
+  trim.SetMaxCyclesPerAxis(max_sub_iter);
+  trim.SetGammaFallback(gamma_fallback);
+  bool result = trim.DoTrim();
+  //trim.TrimStats();
+  trim.Report();
+
+  if (result==true){
+        trim_result = 1.0; //trim_passed;
+   }
+   else {
+        trim_result = 2.0; //trim_failed;
+            //throw TrimFailureException("Trim Failed DoTrimSimulink");
+  };
+
+  return trim_result;
+
+
+}
+
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+void FGFDMExec::DoLinearization(int enable_linearization)
+{
+ 
+  if (enable_linearization==1){
+  double saved_time;
+  if (Constructing) return;
+  saved_time = sim_time;
+  FGLinearization lin(this,1E-4);
+  sim_time = saved_time;
+  Setsim_time(saved_time);
+  }
+  else {
+    cout << "\n Linearization not enabled \n" << endl;
+  }
+}
+
+void FGFDMExec::DoLinearizationSimulink(double h)
+{
+  double saved_time;
+  if (Constructing) return;
+  saved_time = sim_time;
+  FGLinearization lin(this, h);
+  sim_time = saved_time;
+  Setsim_time(saved_time);
+}
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGFDMExec::SRand(int sr)

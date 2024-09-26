@@ -32,9 +32,10 @@ void FGStateSpace::linearize(
     std::vector< std::vector<double> > & A,
     std::vector< std::vector<double> > & B,
     std::vector< std::vector<double> > & C,
-    std::vector< std::vector<double> > & D)
+    std::vector< std::vector<double> > & D,
+    double h)
 {
-    double h = 1e-4;
+
 
     // A, d(x)/dx
     numericalJacobian(A,x,x,x0,x0,h,true);
@@ -73,6 +74,7 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
             x.set(iX,x.get(iX)-h);
             if (computeYDerivative) fn1 = y.getDeriv(iY);
             else fn1 = y.get(iY);
+
 
             x.set(x0);
             x.set(iX,x.get(iX)-2*h);

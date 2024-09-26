@@ -1220,5 +1220,6 @@
     </axis>
 
   </aerodynamics>
-  
+      <output name="localhost" type="FLIGHTGEAR" protocol="UDP" port="5550" rate="60"/>
+
 </fdm_config>

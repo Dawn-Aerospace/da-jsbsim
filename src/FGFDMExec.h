@@ -69,6 +69,7 @@ class FGInertial;
 class FGInput;
 class FGPropulsion;
 class FGMassBalance;
+class FGLinearization;
 
 class TrimFailureException : public BaseException {
   public:
@@ -466,7 +467,9 @@ public:
   * - tTurn
   * - tNone  */
   void DoTrim(int mode);
-
+  double DoTrimSimulink(int mode, int max_iter, int max_sub_iter, bool gamma_fallback, double trim_tol);
+  void DoLinearization(int enable_linearization);
+  void DoLinearizationSimulink(double h);
   /// Disables data logging to all outputs.
   void DisableOutput(void) { Output->Disable(); }
   /// Enables data logging to all outputs.

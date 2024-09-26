@@ -201,6 +201,11 @@ public:
     return mEulerAngles;
   }
 
+  double GetQuaternion(int i) const {
+
+    return data[i];
+  }
+
   /** Retrieves the Euler angles.
       @param i the Euler angle index.
       units radians.

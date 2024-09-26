@@ -279,7 +279,8 @@ public:
                    std::vector< std::vector<double> > & A,
                    std::vector< std::vector<double> > & B,
                    std::vector< std::vector<double> > & C,
-                   std::vector< std::vector<double> > & D);
+                   std::vector< std::vector<double> > & D,
+                   double h=1E-4);
 
 
 private:
@@ -314,7 +315,7 @@ public:
             return (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetAccelerations()->GetUVWdot(1) +
                     m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetAccelerations()->GetUVWdot(2) +
                     m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetAccelerations()->GetUVWdot(3))/
-                   m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
+                    m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
         }
 
     };
@@ -418,6 +419,32 @@ public:
         }
     };
 
+       class Gamma : public Component
+    {
+    public:
+        Gamma() : Component("Gamma","rad") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetEuler(2);
+        }
+        void set(double val)
+        {
+			m_fdm->GetIC()->SetFlightPathAngleRadIC(val);
+            double beta = m_fdm->GetIC()->GetBetaDegIC();
+            double psi = m_fdm->GetIC()->GetPsiRadIC();
+            double theta = m_fdm->GetIC()->GetThetaRadIC();
+            m_fdm->GetIC()->SetAlphaRadIC(theta-val);
+            m_fdm->GetIC()->SetBetaRadIC(beta);
+            m_fdm->GetIC()->SetPsiRadIC(psi);
+            m_fdm->GetIC()->SetThetaRadIC(theta);
+        }
+        double getDeriv() const
+        {
+            return m_fdm->GetAuxiliary()->GetEulerRates(2) - m_fdm->GetAuxiliary()->Getadot();
+        }
+    };
+
+    
     class Q : public Component
     {
     public:
@@ -838,7 +865,7 @@ public:
     class Vn : public Component
     {
     public:
-        Vn() : Component("Vel north","feet/s") {};
+        Vn() : Component("Vel north","ft/s") {};
         double get() const
         {
             return m_fdm->GetPropagate()->GetVel(1);
@@ -857,7 +884,7 @@ public:
     class Ve : public Component
     {
     public:
-        Ve() : Component("Vel east","feet/s") {};
+        Ve() : Component("Vel east","ft/s") {};
         double get() const
         {
             return m_fdm->GetPropagate()->GetVel(2);
@@ -876,7 +903,7 @@ public:
     class Vd : public Component
     {
     public:
-        Vd() : Component("Vel down","feet/s") {};
+        Vd() : Component("Vel down","ft/s") {};
         double get() const
         {
             return m_fdm->GetPropagate()->GetVel(3);
@@ -918,7 +945,6 @@ public:
             return Vn/(Vn*Vn+Ve*Ve)*Vedot - Ve/(Vn*Vn+Ve*Ve)*Vndot;
         }
     };
-
 };
 
 // stream output

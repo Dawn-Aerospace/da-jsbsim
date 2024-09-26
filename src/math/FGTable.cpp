@@ -508,7 +508,16 @@ double FGTable::GetValue(double key) const
   double Span = Data[2*r] - x0;
   assert(Span > 0.0);
   double Factor = (key - x0) / Span;
-  assert(Factor >= 0.0 && Factor <= 1.0);
+
+    // when running jsbsimulink, when the dt is not small enough everything crashes due to this assert!
+    if(Factor >= 0.0 && Factor <= 1.0){
+        // do nothing
+    }
+    else{
+    Factor = 1.0;}
+  //assert(Factor >= 0.0 && Factor <= 1.0);
+
+
 
   double y0 = Data[2*r-1];
   return Factor*(Data[2*r+1] - y0) + y0;

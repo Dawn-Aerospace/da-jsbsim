@@ -128,7 +128,6 @@ class JSBSIM_API FGTrim : public FGJSBBase
   unsigned int Nsub;
   TrimMode mode;
   int DebugLevel, Debug;
-  double Tolerance, A_Tolerance;
   std::vector<double> sub_iterations, successful;
   std::vector<bool> solution;
   unsigned int max_sub_iterations;
@@ -184,7 +183,7 @@ public:
       @param FDMExec pointer to a JSBSim executive object.
       @param tm trim mode
   */
-  FGTrim(FGFDMExec *FDMExec, TrimMode tm=tGround );
+  FGTrim(FGFDMExec *FDMExec, TrimMode tm=tGround, double trim_tol=DEFAULT_TOLERANCE);
 
   ~FGTrim(void);
 
@@ -207,7 +206,7 @@ public:
       @param tm the set of axes to trim. Can be:
              tLongitudinal, tFull, tGround, tCustom, or tNone
   */
-  void SetMode(TrimMode tm);
+  void SetMode(TrimMode tm, double trim_tol=DEFAULT_TOLERANCE);
 
   /** Clear all state-control pairs from the current configuration.
       The trimming routine must have at least one state-control pair
@@ -263,14 +262,6 @@ public:
   */
   inline void SetMaxCyclesPerAxis(int ii) { max_sub_iterations = ii; }
 
-  /** Set the tolerance for declaring a state trimmed. Angular accels are
-      held to a tolerance of 1/10th of the given.  The default is
-      0.001 for the recti-linear accelerations and 0.0001 for the angular.
-  */
-  inline void SetTolerance(double tt) {
-    Tolerance = tt;
-    A_Tolerance = tt / 10;
-  }
 
   /**
     Debug level 1 shows results of each top-level iteration
